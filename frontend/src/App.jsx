@@ -13,6 +13,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import DashboardOverview from "./pages/DashboardOverview";
 import DeconstructPage from "./pages/DeconstructPage";
+import PivotPage from "./pages/PivotPage";
 import SavedProjectsPage from "./pages/SavedProjectsPage";
 import Home from "./pages/Home";
 import FeaturesPage from "./pages/FeaturesPage";
@@ -51,6 +52,34 @@ function AppContent() {
       console.error("Login failed", error);
     }
   };
+
+  // Sync URL with currentPage
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab && tab !== currentPage) {
+      setCurrentPage(tab);
+    }
+
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab) setCurrentPage(tab);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []); // Run once on mount for init and listener
+
+  // Update URL when currentPage changes
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tab") !== currentPage) {
+      const url = new URL(window.location);
+      url.searchParams.set("tab", currentPage);
+      window.history.pushState({}, "", url);
+    }
+  }, [currentPage]);
 
   // Auth Persistence & Redirect
   useEffect(() => {
@@ -96,6 +125,7 @@ function AppContent() {
           <DashboardLayout onLogout={handleLogout}>
             {currentPage === "dashboard" && <DashboardOverview />}
             {currentPage === "deconstruct" && <DeconstructPage />}
+            {currentPage === "pivot" && <PivotPage />}
             {currentPage === "saved" && <SavedProjectsPage />}
             {/* Legacy route - can be removed later */}
             {currentPage === "old-dashboard" && <Dashboard />}

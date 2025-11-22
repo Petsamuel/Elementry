@@ -45,7 +45,8 @@ import {
 } from "recharts";
 
 export default function DeconstructPage() {
-  const { user, selectedProjectId, setSelectedProjectId } = useAuthStore();
+  const { user, selectedProjectId, setSelectedProjectId, setCurrentPage } =
+    useAuthStore();
   const [idea, setIdea] = useState("");
   const [results, setResults] = useState(null);
 
@@ -81,6 +82,33 @@ export default function DeconstructPage() {
       );
     },
   });
+
+  const createPivotMutation = useMutation({
+    mutationFn: ({ pivotName, projectId, token }) =>
+      api.createPivot({ project_id: projectId, pivot_name: pivotName }, token),
+    onSuccess: () => {
+      toast.success("Pivot opportunity activated!");
+      setCurrentPage("pivot");
+    },
+    onError: (error) => {
+      console.error("Failed to create pivot:", error);
+      toast.error("Failed to activate pivot opportunity.");
+    },
+  });
+
+  const handlePivotClick = async (pivotName) => {
+    if (!results?.project_id) return;
+    try {
+      const token = await user.getIdToken();
+      createPivotMutation.mutate({
+        pivotName,
+        projectId: results.project_id,
+        token,
+      });
+    } catch (error) {
+      console.error("Error activating pivot:", error);
+    }
+  };
 
   const handleDeconstruct = async () => {
     if (!idea.trim()) {
@@ -697,15 +725,23 @@ export default function DeconstructPage() {
                       <motion.div
                         key={index}
                         whileHover={{ x: 5 }}
+                        onClick={() => handlePivotClick(pivot)}
                         className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-accent/30 hover:bg-white/10 transition-all group/item cursor-pointer"
                       >
                         <div className="flex items-start gap-3">
                           <div className="p-1.5 rounded-lg bg-white/5 group-hover/item:bg-accent/20 transition-colors">
                             <TrendingUp className="w-4 h-4 text-gray-400 group-hover/item:text-accent transition-colors" />
                           </div>
-                          <p className="text-sm text-gray-400 group-hover/item:text-white transition-colors flex-1 leading-relaxed">
-                            {pivot}
-                          </p>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-400 group-hover/item:text-white transition-colors leading-relaxed">
+                              {pivot}
+                            </p>
+                            {createPivotMutation.isPending && (
+                              <span className="text-xs text-accent animate-pulse mt-1 block">
+                                Activating...
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     ))}

@@ -117,5 +117,27 @@ export const api = {
     );
     return response.data;
   },
+
+  createPivot: async (data, token) => {
+    const response = await axios.post(
+      `${API_URL}/pivots`,
+      data,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
+
+  getPivots: async (projectId, token) => {
+    const url = projectId 
+      ? `${API_URL}/pivots?project_id=${projectId}`
+      : `${API_URL}/pivots`;
+      
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
 };
 

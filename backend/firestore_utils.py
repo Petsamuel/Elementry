@@ -358,3 +358,54 @@ def get_project(uid: str, project_id: str) -> Optional[Dict]:
             data['updated_at'] = ts.isoformat()
             
     return data
+
+def create_pivot(uid: str, pivot_data: Dict) -> str:
+    """
+    Create a new pivot for user
+    Returns: pivot_id
+    """
+    db = get_db()
+    if not db:
+        return "mock-pivot-id"
+    
+    pivots_ref = db.collection('users').document(uid).collection('pivots')
+    
+    # Add metadata
+    pivot_data['created_at'] = firestore.SERVER_TIMESTAMP
+    pivot_data['status'] = 'active'
+    
+    # Create pivot
+    pivot_ref = pivots_ref.document()
+    pivot_ref.set(pivot_data)
+    
+    return pivot_ref.id
+
+def get_pivots(uid: str, project_id: Optional[str] = None) -> List[Dict]:
+    """
+    Fetch pivots for user, optionally filtered by project_id
+    """
+    db = get_db()
+    if not db:
+        return []
+    
+    pivots_ref = db.collection('users').document(uid).collection('pivots')
+    
+    if project_id:
+        query = pivots_ref.where('project_id', '==', project_id).order_by('created_at', direction=firestore.Query.DESCENDING)
+    else:
+        query = pivots_ref.order_by('created_at', direction=firestore.Query.DESCENDING)
+    
+    pivots = []
+    for doc in query.stream():
+        data = doc.to_dict()
+        data['id'] = doc.id
+        
+        # Convert timestamps
+        if 'created_at' in data and data['created_at']:
+            ts = data['created_at']
+            if hasattr(ts, 'isoformat'):
+                data['created_at'] = ts.isoformat()
+                
+        pivots.append(data)
+    
+    return pivots

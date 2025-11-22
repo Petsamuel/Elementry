@@ -18,3 +18,8 @@ class DeconstructionResult(BaseModel):
     pivot_options: List[str]
     sustainability_tip: str
     project_id: Optional[str] = None
+
+class PivotRequest(BaseModel):
+    project_id: str
+    pivot_name: str
+    original_idea: Optional[str] = None

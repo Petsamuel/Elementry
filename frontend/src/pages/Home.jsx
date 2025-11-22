@@ -8,7 +8,6 @@ import {
   Check,
   Star,
 } from "lucide-react";
-import TiltCard from "../components/TiltCard";
 import ParticleBackground from "../components/ParticleBackground";
 import logo2 from "../assets/logo2.png";
 import googleLogo from "../assets/google.webp";
@@ -50,7 +49,7 @@ export default function Home({ onStart }) {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onStart}
-                className="group px-8 py-4 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                className="group px-8 py-4 bg-accent hover:bg-accent-hover  rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 text-black "
               >
                 Break Down My Idea
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
