@@ -21,6 +21,7 @@ CACHE_TTL = 60 * 5  # 5 minutes
 origins = [
     "http://localhost:5173",  # Vite default port
     "http://localhost:3000",
+    "https://elementry.vercel.app/"
 ]
 
 app.add_middleware(
