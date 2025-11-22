@@ -520,11 +520,11 @@ export default function DeconstructPage() {
                     <p className="text-xs text-primary font-mono mb-3">
                       LONG_TERM_VIABILITY
                     </p>
+                  </div>
+                </div>
                     <p className="text-gray-400 leading-relaxed text-sm">
                       {results.sustainability_tip}
                     </p>
-                  </div>
-                </div>
               </motion.div>
 
               {/* Overall Score */}

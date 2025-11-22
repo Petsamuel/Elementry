@@ -161,5 +161,16 @@ export const api = {
     );
     return response.data;
   },
+
+  diagnoseProject: async (projectId, challenges, token) => {
+    const response = await axios.post(
+      `${API_URL}/projects/${projectId}/diagnose`,
+      { project_id: projectId, challenges },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
 };
 

@@ -136,11 +136,11 @@ export default function CheapestPointPage() {
                 </span>
               </div>
 
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+              <h2 className="text-xl md:text-xl lg:text-xl font-bold text-white mb-6 leading-[1.1] tracking-tight ">
                 {projectData.cheapest_entry_point || "Analysis Pending..."}
               </h2>
 
-              <p className="text-text-muted text-lg md:text-xl leading-relaxed max-w-2xl">
+              <p className="text-text-muted text-sm md:text-sm leading-relaxed max-w-2xl">
                 This entry point minimizes initial capital requirement while
                 maximizing learning. It focuses on the core "Atomic Unit of
                 Value" identified in the deconstruction phase.

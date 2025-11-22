@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from models import DeconstructionRequest, DeconstructionResult, PivotRequest
+from models import DeconstructionRequest, DeconstructionResult, PivotRequest, DiagnosisRequest
 from engine import deconstruct_business_idea
 from auth import verify_token, sync_user_to_firestore, check_ai_limit, increment_ai_usage
 from typing import Annotated
@@ -18,10 +18,16 @@ project_cache = {}
 CACHE_TTL = 60 * 5  # 5 minutes
 
 # CORS Configuration
-
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://elementry.vercel.app",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -283,6 +289,36 @@ async def update_pivot_status_endpoint(
         raise HTTPException(status_code=400, detail="Invalid status or pivot not found")
     
     return {"success": success, "status": new_status}
+
+@app.post("/projects/{project_id}/diagnose", dependencies=[Depends(rate_limiter)])
+async def diagnose_project_endpoint(
+    project_id: str,
+    request: DiagnosisRequest,
+    token_data: dict = Depends(get_token)
+):
+    """Diagnose business challenges"""
+    from firestore_utils import update_project_diagnosis, get_project
+    from engine import generate_diagnosis
+    
+    uid = token_data['uid']
+    
+    # Get project context
+    project = get_project(uid, project_id)
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+        
+    idea = project.get('name', '')
+    
+    # Generate diagnosis
+    diagnosis_result = await generate_diagnosis(idea, request.challenges)
+    
+    # Save to Firestore
+    success = update_project_diagnosis(uid, project_id, diagnosis_result.dict())
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to save diagnosis")
+        
+    return diagnosis_result
 
 
 if __name__ == "__main__":

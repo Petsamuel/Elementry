@@ -110,3 +110,29 @@
 .mask-linear-fade {
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
+
+::-webkit-scrollbar {
+  width: 6px !important;
+  /* Thin scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  /* Transparent track */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c8ff16;
+  /* Accent color for the thumb */
+  border-radius: 10px;
+  /* Rounded corners for the thumb */
+  border: 2px solid transparent;
+  /* Optional: border to make it look thinner */
+  background-clip: content-box;
+  /* Ensure border doesn't cover the thumb color */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #c8ff16;
+  /* Slightly darker on hover */
+}

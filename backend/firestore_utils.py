@@ -531,3 +531,20 @@ def get_pivot_by_id(uid: str, pivot_id: str) -> Optional[Dict]:
             data['created_at'] = ts.isoformat()
     
     return data
+
+def update_project_diagnosis(uid: str, project_id: str, diagnosis_data: Dict) -> bool:
+    """
+    Update project with diagnosis results
+    """
+    db = get_db()
+    if not db:
+        return True
+    
+    project_ref = db.collection('users').document(uid).collection('projects').document(project_id)
+    project_ref.update({
+        'diagnosis': diagnosis_data,
+        'updated_at': firestore.SERVER_TIMESTAMP
+    })
+    
+    return True
+

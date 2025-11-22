@@ -24,6 +24,20 @@ class PivotRequest(BaseModel):
     pivot_name: str
     original_idea: Optional[str] = None
 
+class DiagnosisRequest(BaseModel):
+    project_id: str
+    challenges: str
+    current_status: Optional[str] = None
+
+class DiagnosisResult(BaseModel):
+    weak_link: str
+    weak_link_detail: str
+    root_cause: str
+    immediate_fix: str
+    strategic_adjustment: str
+    viability_score: int
+
+
 class ActionUpdateRequest(BaseModel):
     completed: bool
 
