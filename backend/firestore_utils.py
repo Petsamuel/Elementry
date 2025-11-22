@@ -504,3 +504,113 @@ def get_pivots(uid: str, project_id: Optional[str] = None) -> List[Dict]:
     pivots.sort(key=lambda x: x.get('created_at', ''), reverse=True)
     
     return pivots
+
+def update_pivot_action(uid: str, pivot_id: str, action_index: int, completed: bool) -> Optional[Dict]:
+    """
+    Mark a specific action as complete/incomplete in a pivot
+    Returns updated pivot data
+    """
+    from datetime import datetime
+    db = get_db()
+    if not db:
+        return None
+    
+    pivot_ref = db.collection('users').document(uid).collection('pivots').document(pivot_id)
+    pivot_doc = pivot_ref.get()
+    
+    if not pivot_doc.exists:
+        return None
+    
+    data = pivot_doc.to_dict()
+    
+    # Update the specific action
+    if 'analysis' in data and 'recommended_actions' in data['analysis']:
+        actions = data['analysis']['recommended_actions']
+        if 0 <= action_index < len(actions):
+            actions[action_index]['completed'] = completed
+            
+            # Recalculate progress
+            completed_count = sum(1 for a in actions if a.get('completed', False))
+            total_count = len(actions)
+            progress = int((completed_count / total_count) * 100) if total_count > 0 else 0
+            
+            # Update analysis fields
+            data['analysis']['actions_completed'] = completed_count
+            data['analysis']['progress_percentage'] = progress
+            
+            # Update status based on progress
+            if progress == 0:
+                data['analysis']['status'] = 'active'
+            elif progress == 100:
+                data['analysis']['status'] = 'completed'
+                data['analysis']['completed_at'] = datetime.now().isoformat()
+            else:
+                data['analysis']['status'] = 'in_progress'
+                # Set started_at on first action completion
+                if data['analysis'].get('started_at') is None:
+                    data['analysis']['started_at'] = datetime.now().isoformat()
+            
+            # Save updates
+            pivot_ref.update({
+                'analysis': data['analysis'],
+                'updated_at': firestore.SERVER_TIMESTAMP
+            })
+            
+            # Return updated data with id
+            data['id'] = pivot_id
+            return data
+    
+    return None
+
+def update_pivot_status(uid: str, pivot_id: str, new_status: str) -> bool:
+    """
+    Update the status of a pivot simulation
+    Valid statuses: active, in_progress, completed, on_hold, abandoned
+    """
+    from datetime import datetime
+    db = get_db()
+    if not db:
+        return False
+    
+    valid_statuses = ['active', 'in_progress', 'completed', 'on_hold', 'abandoned']
+    if new_status not in valid_statuses:
+        return False
+    
+    pivot_ref = db.collection('users').document(uid).collection('pivots').document(pivot_id)
+    
+    update_data = {
+        'analysis.status': new_status,
+        'updated_at': firestore.SERVER_TIMESTAMP
+    }
+    
+    # Set completion timestamp if marking as completed
+    if new_status == 'completed':
+        update_data['analysis.completed_at'] = datetime.now().isoformat()
+    
+    pivot_ref.update(update_data)
+    return True
+
+def get_pivot_by_id(uid: str, pivot_id: str) -> Optional[Dict]:
+    """
+    Get a single pivot by ID
+    """
+    db = get_db()
+    if not db:
+        return None
+    
+    pivot_ref = db.collection('users').document(uid).collection('pivots').document(pivot_id)
+    doc = pivot_ref.get()
+    
+    if not doc.exists:
+        return None
+    
+    data = doc.to_dict()
+    data['id'] = doc.id
+    
+    # Convert timestamps
+    if 'created_at' in data and data['created_at']:
+        ts = data['created_at']
+        if hasattr(ts, 'isoformat'):
+            data['created_at'] = ts.isoformat()
+    
+    return data

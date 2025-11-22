@@ -139,5 +139,27 @@ export const api = {
     });
     return response.data;
   },
+
+  updatePivotAction: async (pivotId, actionIndex, completed, token) => {
+    const response = await axios.patch(
+      `${API_URL}/pivots/${pivotId}/actions/${actionIndex}`,
+      { completed },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
+
+  updatePivotStatus: async (pivotId, status, token) => {
+    const response = await axios.patch(
+      `${API_URL}/pivots/${pivotId}/status`,
+      { status },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
 };
 

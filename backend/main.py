@@ -458,6 +458,44 @@ async def get_pivots_endpoint(project_id: str = None, token_data: dict = Depends
     pivots = get_pivots(token_data['uid'], project_id)
     return {"pivots": pivots}
 
+@app.patch("/pivots/{pivot_id}/actions/{action_index}")
+async def update_pivot_action_endpoint(
+    pivot_id: str,
+    action_index: int,
+    request: dict,
+    token_data: dict = Depends(get_token)
+):
+    """Mark a specific action as complete/incomplete"""
+    from firestore_utils import update_pivot_action
+    
+    completed = request.get('completed', False)
+    updated_pivot = update_pivot_action(token_data['uid'], pivot_id, action_index, completed)
+    
+    if not updated_pivot:
+       raise HTTPException(status_code=404, detail="Pivot or action not found")
+    
+    return updated_pivot
+
+@app.patch("/pivots/{pivot_id}/status")
+async def update_pivot_status_endpoint(
+    pivot_id: str,
+    request: dict,
+    token_data: dict = Depends(get_token)
+):
+    """Update pivot simulation status"""
+    from firestore_utils import update_pivot_status
+    
+    new_status = request.get('status')
+    if not new_status:
+        raise HTTPException(status_code=400, detail="Status is required")
+    
+    success = update_pivot_status(token_data['uid'], pivot_id, new_status)
+    if not success:
+        raise HTTPException(status_code=400, detail="Invalid status or pivot not found")
+    
+    return {"success": success, "status": new_status}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)

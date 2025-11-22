@@ -23,3 +23,9 @@ class PivotRequest(BaseModel):
     project_id: str
     pivot_name: str
     original_idea: Optional[str] = None
+
+class ActionUpdateRequest(BaseModel):
+    completed: bool
+
+class StatusUpdateRequest(BaseModel):
+    status: str  # "active", "in_progress", "completed", "on_hold", "abandoned"
