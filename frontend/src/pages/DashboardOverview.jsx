@@ -287,12 +287,12 @@ export default function DashboardOverview() {
               </span>
               <span className="text-text-muted text-sm">analyses left</span>
             </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-2 bg-white/10 dark:bg-white/10 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${usage.percentage}%` }}
                 transition={{ duration: 1, delay: 1.2 }}
-                className="h-full bg-primary rounded-full"
+                className="h-full bg-accent rounded-full"
               />
             </div>
           </div>

@@ -17,97 +17,10 @@
 
 :root {
   --primary: #5941ff;
-  --accent: #10b981;
-  /* Professional green for CTAs */
-  --accent-hover: #059669;
-  --accent-neon: #c8ff16;
-  /* Keep for accents only */
-
-  /* Light Mode Defaults */
-  --obsidian: #ffffff;
-  --bg: #ffffff;
-  --bg-secondary: #f9fafb;
-  --text: #111827;
-  --text-muted: #6b7280;
-  --text-light: #9ca3af;
-  --text-inverted: #ffffff;
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --card-border: rgba(0, 0, 0, 0.08);
-  --border-light: #e5e7eb;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.dark {
-  --obsidian: #0a0a0a;
-  --bg: #0a0a0a;
-  --bg-secondary: #111827;
-  --text: #ffffff;
-  --text-muted: #9ca3af;
-  --text-light: #6b7280;
-  --text-inverted: #000000;
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --border-light: rgba(255, 255, 255, 0.1);
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
-}
-
-@layer base {
-  body {
-    @apply bg-bg text-text font-sans antialiased transition-colors duration-300;
-  }
-}
-
-/* Glassmorphism Utilities */
-.glass-panel {
-  @apply bg-card-bg backdrop-blur-lg border border-card-border;
-}
-
-.glass-card {
-  @apply bg-card-bg backdrop-blur-md border border-card-border rounded-xl;
-}
-
-/* Professional Card Styles */
-.pro-card {
-  @apply bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300;
-}
-
-/* Badge Styles */
-.badge {
-  @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium;
-}
-
-.badge-success {
-  @apply bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800;
-}
-
-@import "tailwindcss";
-
-@theme {
-  --color-primary: var(--primary);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-obsidian: var(--obsidian);
-  --color-bg: var(--bg);
-  --color-bg-secondary: var(--bg-secondary);
-  --color-text: var(--text);
-  --color-text-muted: var(--text-muted);
-  --color-text-light: var(--text-light);
-  --color-card-bg: var(--card-bg);
-  --color-card-border: var(--card-border);
-  --font-sans: Inter, sans-serif;
-}
-
-:root {
-  --primary: #5941ff;
-  --accent: #10b981;
-  /* Professional green for CTAs */
-  --accent-hover: #059669;
-  --accent-neon: #c8ff16;
-  /* Keep for accents only */
+  --accent: #c8ff16;
+  /* Neon lime accent */
+  --accent-hover: #a3d912;
+  /* Darker neon lime for hover */
 
   /* Light Mode Defaults */
   --obsidian: #ffffff;
@@ -172,7 +85,7 @@
 
 /* Professional Button Styles */
 .btn-primary {
-  @apply px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200;
+  @apply px-6 py-3 bg-accent hover:bg-accent-hover text-obsidian rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200;
 }
 
 .btn-secondary {

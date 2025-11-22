@@ -68,8 +68,13 @@ def get_user_alerts(uid: str, limit: int = 5) -> List[Dict]:
         alert_data = alert_doc.to_dict()
         alert_data['id'] = alert_doc.id
         # Convert timestamp to ISO string for JSON serialization
+        # Convert timestamp to ISO string for JSON serialization
         if 'created_at' in alert_data and alert_data['created_at']:
-            alert_data['created_at'] = alert_data['created_at'].isoformat()
+            ts = alert_data['created_at']
+            if hasattr(ts, 'isoformat'):
+                alert_data['created_at'] = ts.isoformat()
+            elif isinstance(ts, str):
+                pass # Already a string
         alerts.append(alert_data)
     
     return alerts
@@ -91,9 +96,13 @@ def get_user_projects(uid: str, limit: int = 5) -> List[Dict]:
         project_data['id'] = project_doc.id
         # Convert timestamps
         if 'created_at' in project_data and project_data['created_at']:
-            project_data['created_at'] = project_data['created_at'].isoformat()
+            ts = project_data['created_at']
+            if hasattr(ts, 'isoformat'):
+                project_data['created_at'] = ts.isoformat()
         if 'updated_at' in project_data and project_data['updated_at']:
-            project_data['updated_at'] = project_data['updated_at'].isoformat()
+            ts = project_data['updated_at']
+            if hasattr(ts, 'isoformat'):
+                project_data['updated_at'] = ts.isoformat()
         projects.append(project_data)
     
     return projects
@@ -243,3 +252,109 @@ def get_user_usage_stats(uid: str) -> Dict:
         "limit": limit,
         "percentage": round(percentage, 1)
     }
+
+def get_project_growth(uid: str) -> List[Dict]:
+    """
+    Get project growth data for chart
+    Returns: List of {date: str, count: int}
+    """
+    db = get_db()
+    if not db:
+        return []
+    
+    projects_ref = db.collection('users').document(uid).collection('projects')
+    projects = projects_ref.order_by('created_at').stream()
+    
+    # Process projects into cumulative count by date
+    growth_data = []
+    cumulative_count = 0
+    
+    # Group by date (YYYY-MM-DD)
+    date_counts = {}
+    
+    for project in projects:
+        data = project.to_dict()
+        if 'created_at' in data and data['created_at']:
+            ts = data['created_at']
+            date_str = None
+            
+            if hasattr(ts, 'date'):
+                date_str = ts.date().isoformat()
+            elif hasattr(ts, 'isoformat'):
+                # Handle case where it might be a datetime but not have .date() (unlikely for datetime, but possible for some types)
+                date_str = ts.isoformat().split('T')[0]
+            elif isinstance(ts, str):
+                date_str = ts.split('T')[0]
+                
+            if date_str:
+                date_counts[date_str] = date_counts.get(date_str, 0) + 1
+            
+    # Sort dates
+    sorted_dates = sorted(date_counts.keys())
+    
+    for date in sorted_dates:
+        cumulative_count += date_counts[date]
+        growth_data.append({
+            "date": date,
+            "count": cumulative_count
+        })
+        
+    return growth_data
+
+def delete_project(uid: str, project_id: str) -> bool:
+    """
+    Delete a project for user
+    """
+    db = get_db()
+    if not db:
+        return True
+    
+    project_ref = db.collection('users').document(uid).collection('projects').document(project_id)
+    project_ref.delete()
+    
+    return True
+
+def update_project_status(uid: str, project_id: str, status: str) -> bool:
+    """
+    Update project status
+    """
+    db = get_db()
+    if not db:
+        return True
+    
+    project_ref = db.collection('users').document(uid).collection('projects').document(project_id)
+    project_ref.update({
+        'status': status,
+        'updated_at': firestore.SERVER_TIMESTAMP
+    })
+    
+    return True
+
+def get_project(uid: str, project_id: str) -> Optional[Dict]:
+    """
+    Get a single project details
+    """
+    db = get_db()
+    if not db:
+        return None
+    
+    project_ref = db.collection('users').document(uid).collection('projects').document(project_id)
+    doc = project_ref.get()
+    
+    if not doc.exists:
+        return None
+        
+    data = doc.to_dict()
+    data['id'] = doc.id
+    
+    # Convert timestamps
+    if 'created_at' in data and data['created_at']:
+        ts = data['created_at']
+        if hasattr(ts, 'isoformat'):
+            data['created_at'] = ts.isoformat()
+    if 'updated_at' in data and data['updated_at']:
+        ts = data['updated_at']
+        if hasattr(ts, 'isoformat'):
+            data['updated_at'] = ts.isoformat()
+            
+    return data

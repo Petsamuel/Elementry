@@ -25,7 +25,7 @@ export default function StatCard({
         {trend && (
           <div
             className={`flex items-center gap-1 text-sm font-medium ${
-              isPositive ? "text-green-500" : "text-red-500"
+              isPositive ? "text-accent" : "text-gray-400"
             }`}
           >
             {isPositive ? (

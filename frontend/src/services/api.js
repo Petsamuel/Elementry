@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 export const api = {
   syncUser: async (token) => {
@@ -73,6 +73,46 @@ export const api = {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+      }
+    );
+    return response.data;
+  },
+
+  getDashboardOverview: async (token) => {
+    const response = await axios.get(`${API_URL}/dashboard/overview`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
+
+  deleteProject: async (projectId, token) => {
+    const response = await axios.delete(
+      `${API_URL}/dashboard/projects/${projectId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  updateProjectStatus: async (projectId, status, token) => {
+    const response = await axios.patch(
+      `${API_URL}/dashboard/projects/${projectId}/status`,
+      { status },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
+
+  getProject: async (projectId, token) => {
+    const response = await axios.get(
+      `${API_URL}/dashboard/projects/${projectId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
     return response.data;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, LogOut } from "lucide-react";
-import ThemeToggle from "../components/ThemeToggle";
+
 import * as Avatar from "@radix-ui/react-avatar";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -68,7 +68,6 @@ export default function PublicLayout({ children, onLogin, onNavigate }) {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <ThemeToggle />
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <Avatar.Root className="inline-flex h-10 w-10 select-none items-center justify-center overflow-hidden rounded-full align-middle">
@@ -95,26 +94,19 @@ export default function PublicLayout({ children, onLogin, onNavigate }) {
                 </button>
               </div>
             ) : (
-              <>
-                <button
-                  onClick={onLogin}
-                  className="text-sm font-medium hover:text-accent transition-colors"
-                >
-                  Log In
-                </button>
-                <button
-                  onClick={onLogin}
-                  className="bg-white text-black px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-200 transition-colors shadow-lg shadow-white/10"
-                >
-                  Sign Up
-                </button>
-              </>
+              <button
+                onClick={onLogin}
+                className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-200 transition-colors shadow-lg shadow-white/10"
+              >
+                {/* <img src={googleLogo} alt="Google" className="w-4 h-4" /> */}
+                Sign in with Google
+              </button>
             )}
           </div>
 
           {/* Mobile Toggle */}
           <div className="md:hidden flex items-center gap-4">
-            <ThemeToggle />
+          
             <button
               className="text-text"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -182,26 +174,16 @@ export default function PublicLayout({ children, onLogin, onNavigate }) {
                   </button>
                 </>
               ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      onLogin();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-left hover:text-accent"
-                  >
-                    Log In
-                  </button>
-                  <button
-                    onClick={() => {
-                      onLogin();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="bg-primary text-white px-6 py-3 rounded-xl text-center"
-                  >
-                    Sign Up
-                  </button>
-                </>
+                <button
+                  onClick={() => {
+                    onLogin();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-xl text-center font-bold"
+                >
+                  <img src={googleLogo} alt="Google" className="w-5 h-5" />
+                  Sign in with Google
+                </button>
               )}
             </div>
           </motion.div>

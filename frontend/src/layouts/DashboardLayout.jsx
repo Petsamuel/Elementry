@@ -13,7 +13,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import ThemeToggle from "../components/ThemeToggle";
+
 import { useAuthStore } from "../store/useAuthStore";
 
 // Move SidebarContent outside to avoid creating components during render
@@ -28,7 +28,7 @@ const SidebarContent = ({
   onLogout,
 }) => (
   <>
-    <div className="p-6 flex items-center justify-between">
+    <div className="p-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 bg-primary rounded-lg flex-shrink-0 flex items-center justify-center text-white font-bold">
           E
@@ -38,9 +38,6 @@ const SidebarContent = ({
             ELEMENTAL
           </span>
         )}
-        <div className="flex items-center justify-center py-2">
-          <ThemeToggle />
-        </div>
       </div>
       {isMobile && (
         <button
@@ -52,7 +49,7 @@ const SidebarContent = ({
       )}
     </div>
 
-    <div className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+    <div className="flex-1 px-4 py-2 space-y-2 overflow-y-auto">
       {menuItems.map((item) => {
         const isActive = currentPage === item.id;
         return (
@@ -186,7 +183,6 @@ export default function DashboardLayout({ children, onLogout }) {
             <span className="font-bold text-lg">ELEMENTAL</span>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="text-text-muted hover:text-text transition-colors"

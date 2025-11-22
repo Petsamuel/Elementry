@@ -20,36 +20,51 @@ async def deconstruct_business_idea(idea: str) -> DeconstructionResult:
         print("WARNING: No GEMINI_API_KEY found. Using mock data.")
         return _get_mock_data(idea)
 
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-1.5-pro')
 
     prompt = f"""
-    You are an expert business strategist using the "Elemental Business Model".
-    Deconstruct the following business idea into 7 distinct business elements (sub-businesses).
-    
-    Idea: "{idea}"
-    
-    The 7 elements should cover different aspects like Production, Content, Training, Service, etc.
-    Identify the "Cheapest Entry Point" (the easiest way to start with little money).
-    Provide 3-5 "Pivot Options" (adjacent industries).
-    
-    Return the response in STRICT JSON format matching this schema:
-    {{
-        "original_idea": "{idea}",
-        "cheapest_entry_point": "string",
-        "elements": [
-            {{
-                "name": "string",
-                "type": "string (e.g. Production, Service, Content)",
-                "description": "string",
-                "monetization_potential": "string (High/Medium/Low)"
-            }}
-        ],
-        "pivot_options": ["string", "string"],
-        "sustainability_tip": "string"
-    }}
-    
-    Do not include markdown formatting (like ```json). Just the raw JSON string.
-    """
+        You are an expert business strategist specializing in the "Elemental Business Model Deconstruction".
+        Your task is to deconstruct the given business idea into EXACTLY 7 distinct business elements (sub-businesses).
+        Each element represents a modular, standalone aspect that could potentially be spun off or focused on independently.
+
+        Business Idea: "{idea}"
+
+        Guidelines:
+        - Identify EXACTLY 7 elements. Do not provide fewer or more.
+        - Suggested element types (adapt as needed but cover diverse aspects): 
+          1. Production/Manufacturing (creating physical/digital products),
+          2. Content Creation (media, blogs, videos),
+          3. Training/Education (courses, workshops),
+          4. Service Delivery (consulting, support),
+          5. Marketing/Distribution (sales channels, advertising),
+          6. Community Building (networks, forums),
+          7. Technology/Innovation (tools, apps, R&D).
+        - For each element: Provide a concise name, type (from above or similar), description (2-3 sentences on how it fits the idea), and monetization potential (High: scalable revenue; Medium: steady but limited; Low: supportive role).
+        - Cheapest Entry Point: The simplest, lowest-cost way to validate/start the idea (e.g., using free tools, minimal viable product).
+        - Pivot Options: 3-5 adjacent industries or variations where this idea could pivot (e.g., from fitness app to wellness coaching).
+        - Sustainability Tip: One key advice for long-term viability (e.g., focus on recurring revenue).
+
+        Examples:
+        - For idea "Online Fitness Coaching Platform":
+          Elements might include: Content (workout videos), Training (personalized plans), Service (live sessions), etc.
+
+        Output STRICTLY in raw JSON format matching this exact schema. No additional text, no markdown, no explanations outside JSON.
+        {{
+            "original_idea": "{idea}",
+            "cheapest_entry_point": "string description",
+            "elements": [
+                {{
+                    "name": "string",
+                    "type": "string",
+                    "description": "string",
+                    "monetization_potential": "High|Medium|Low"
+                }}
+                // exactly 7 objects
+            ],
+            "pivot_options": ["string1", "string2", "string3"],  // 3-5 strings
+            "sustainability_tip": "string"
+        }}
+        """
 
     try:
         response = model.generate_content(prompt)

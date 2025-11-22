@@ -1,4 +1,5 @@
 import { useAuthStore } from "./store/useAuthStore";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "react-hot-toast";
 import {
@@ -12,6 +13,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import DashboardOverview from "./pages/DashboardOverview";
 import DeconstructPage from "./pages/DeconstructPage";
+import SavedProjectsPage from "./pages/SavedProjectsPage";
 import Home from "./pages/Home";
 import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
@@ -50,6 +52,37 @@ function AppContent() {
     }
   };
 
+  // Auth Persistence & Redirect
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // User is signed in
+        login(user);
+
+        // If on a public page, redirect to dashboard
+        // We check if the current page is NOT a dashboard page
+        const publicPages = [
+          "home",
+          "features",
+          "pricing",
+          "templates",
+          "blog",
+          "about",
+        ];
+        if (publicPages.includes(currentPage)) {
+          setCurrentPage("dashboard");
+        }
+      } else {
+        // User is signed out
+        if (isAuthenticated) {
+          logout();
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [login, logout, currentPage, isAuthenticated, setCurrentPage]);
+
   const handleLogout = async () => {
     await auth.signOut();
     logout();
@@ -63,6 +96,7 @@ function AppContent() {
           <DashboardLayout onLogout={handleLogout}>
             {currentPage === "dashboard" && <DashboardOverview />}
             {currentPage === "deconstruct" && <DeconstructPage />}
+            {currentPage === "saved" && <SavedProjectsPage />}
             {/* Legacy route - can be removed later */}
             {currentPage === "old-dashboard" && <Dashboard />}
             {/* Add other authenticated routes here */}

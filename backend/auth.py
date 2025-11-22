@@ -12,13 +12,25 @@ db = None
 
 try:
     if not firebase_admin._apps:
+        # Check for service-account.json first (Development mode)
+        # Use absolute path relative to this file to ensure it works regardless of CWD
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        service_account_path = os.path.join(base_dir, "service-account.json")
+        
+        if os.path.exists(service_account_path):
+            print(f"Initializing Firebase with {service_account_path}...")
+            cred = credentials.Certificate(service_account_path)
+            firebase_admin.initialize_app(cred)
+            print("Firebase Admin initialized successfully (Service Account JSON).")
+            
         # Check if we have env vars
-        if os.getenv("FIREBASE_PRIVATE_KEY"):
+        elif os.getenv("FIREBASE_PRIVATE_KEY"):
+            print("Initializing Firebase with Environment Variables...")
             cred_dict = {
                 "type": os.getenv("FIREBASE_TYPE"),
                 "project_id": os.getenv("FIREBASE_PROJECT_ID"),
                 "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-                "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace('\\n', '\n'),
+                "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace(r'\n', '\n'),
                 "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
                 "client_id": os.getenv("FIREBASE_CLIENT_ID"),
                 "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
@@ -29,13 +41,16 @@ try:
             }
             cred = credentials.Certificate(cred_dict)
             firebase_admin.initialize_app(cred)
+            print("Firebase Admin initialized successfully (Env Vars).")
         else:
             # Fallback to default (e.g. for local dev with GOOGLE_APPLICATION_CREDENTIALS still set)
+            print("Initializing Firebase with Application Default Credentials...")
             cred = credentials.ApplicationDefault()
             firebase_admin.initialize_app(cred)
+            print("Firebase Admin initialized successfully (ADC).")
             
     db = firestore.client()
-    print("Firebase Admin initialized successfully.")
+
 except Exception as e:
     print(f"WARNING: Firebase Admin initialization failed: {e}")
     print("Backend user sync will be disabled until credentials are set up.")

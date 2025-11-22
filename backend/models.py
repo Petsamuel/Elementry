@@ -17,3 +17,4 @@ class DeconstructionResult(BaseModel):
     elements: List[BusinessElement]  # Should be exactly 7
     pivot_options: List[str]
     sustainability_tip: str
+    project_id: Optional[str] = None

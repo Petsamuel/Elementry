@@ -32,21 +32,21 @@ export default function AlertCard({
   const config = {
     warning: {
       icon: AlertTriangle,
-      bgClass: "bg-yellow-500/10 border-yellow-500/30",
-      iconClass: "text-yellow-500",
-      titleClass: "text-yellow-600 dark:text-yellow-400",
+      bgClass: "bg-accent/10 border-accent/30",
+      iconClass: "text-accent",
+      titleClass: "text-white",
     },
     info: {
       icon: Info,
-      bgClass: "bg-blue-500/10 border-blue-500/30",
-      iconClass: "text-blue-500",
-      titleClass: "text-blue-600 dark:text-blue-400",
+      bgClass: "bg-primary/10 border-primary/30",
+      iconClass: "text-primary",
+      titleClass: "text-white",
     },
     success: {
       icon: CheckCircle,
-      bgClass: "bg-green-500/10 border-green-500/30",
-      iconClass: "text-green-500",
-      titleClass: "text-green-600 dark:text-green-400",
+      bgClass: "bg-accent/10 border-accent/30",
+      iconClass: "text-accent",
+      titleClass: "text-white",
     },
   };
 
