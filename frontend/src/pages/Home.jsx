@@ -88,7 +88,7 @@ export default function Home({ onStart }) {
           {/* Right Column: Floating Grid Visual */}
           <div className="relative h-[600px] hidden md:block">
             {/* Abstract Background Blob */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl opacity-50" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-linear-to-br from-accent/20 to-primary/20 rounded-full blur-3xl opacity-50" />
 
             {/* Floating Cards */}
             <motion.div
@@ -159,7 +159,7 @@ export default function Home({ onStart }) {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] bg-white dark:bg-gray-900 p-2 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 z-10 rotate-[-6deg]"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] bg-white dark:bg-gray-900 p-2 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 z-10 -rotate-6"
             >
               <img
                 src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
@@ -238,16 +238,16 @@ export default function Home({ onStart }) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="md:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
+            className="md:col-span-2 bg-linear-to-br from-accent/10 to-transparent border border-accent/20 rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors duration-500" />
 
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 text-primary">
+                <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center mb-6 text-accent">
                   <Layers className="w-6 h-6" />
                 </div>
-                <h3 className="text-2xl font-bold text-black dark:text-white mb-2">
+                <h3 className="text-2xl font-bold  text-white mb-2">
                   Business Deconstruction Engine
                 </h3>
                 <p className="text-text-muted text-lg max-w-md">
@@ -258,13 +258,13 @@ export default function Home({ onStart }) {
               </div>
 
               <div className="mt-8 flex items-center gap-4">
-                <div className="px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm font-medium text-text dark:text-white border border-gray-100 dark:border-gray-700">
+                <div className="px-4 py-2 rounded-lg bg-accent/20 text-sm font-medium text-text dark:text-white border border-accent/10">
                   Production
                 </div>
-                <div className="px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm font-medium text-text dark:text-white border border-gray-100 dark:border-gray-700">
+                <div className="px-4 py-2 rounded-lg bg-accent/20 text-sm font-medium text-text dark:text-white border border-accent/10">
                   Packaging
                 </div>
-                <div className="px-4 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm font-medium text-text dark:text-white border border-gray-100 dark:border-gray-700">
+                <div className="px-4 py-2 rounded-lg bg-accent/20 text-sm font-medium text-text dark:text-white border border-accent/10 w-fit">
                   +5 More
                 </div>
               </div>
@@ -277,9 +277,9 @@ export default function Home({ onStart }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="md:row-span-2 bg-gradient-to-br from-accent/10 to-transparent border border-accent/20 rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
+            className="md:row-span-2 bg-linear-to-br from-accent/10 to-transparent border border-accent/20 rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-linear-to-b from-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
             <div className="relative z-10 h-full flex flex-col">
               <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center mb-6 text-accent-hover">
@@ -293,7 +293,7 @@ export default function Home({ onStart }) {
                 high-impact entry point for your business.
               </p>
 
-              <div className="mt-auto bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-100 dark:border-gray-700 transform group-hover:scale-105 transition-transform duration-300">
+              <div className="mt-auto bg-accent/10 rounded-xl p-4 shadow-lg  transform group-hover:scale-105 transition-transform duration-300">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs text-text-muted">
                     Traditional Launch
@@ -323,12 +323,12 @@ export default function Home({ onStart }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 group hover:shadow-2xl transition-all duration-500"
+            className="bg-linear-to-br from-accent/10 to-transparent border border-accent/15 rounded-3xl p-8 group hover:shadow-2xl transition-all duration-500"
           >
-            <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-6 text-purple-600 dark:text-purple-400">
+            <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center mb-6 text-accent  ">
               <Globe className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-black dark:text-white mb-2">
+            <h3 className="text-xl font-bold text-white mb-2">
               Pivot & Fix Module
             </h3>
             <p className="text-text-muted text-sm">
@@ -343,12 +343,12 @@ export default function Home({ onStart }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col justify-center items-center text-center group hover:scale-[1.02] hover:shadow-2xl transition-all duration-300"
+            className="bg-linear-to-br from-accent/10 to-transparent border border-accent/15 rounded-3xl p-8 flex flex-col justify-center items-center text-center group hover:scale-[1.02] hover:shadow-2xl transition-all duration-300"
           >
-            <Sparkles className="w-8 h-8 mb-4 text-accent" />
-            <div className="text-4xl font-bold mb-2 text-black dark:text-white">
-              300%
+            <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center mb-6 text-accent  ">
+              <Sparkles className="w-6 h-6" />
             </div>
+            <div className="text-4xl font-bold mb-2text-white">300%</div>
             <div className="text-sm text-text-muted">Faster Launch Speed</div>
           </motion.div>
         </div>
@@ -358,7 +358,7 @@ export default function Home({ onStart }) {
       <section className="py-24 px-6 max-w-7xl mx-auto z-10 relative">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12">
           <div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-black dark:text-white">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4  text-white">
               The Architecture
             </h2>
             <p className="text-text-muted">
@@ -368,10 +368,10 @@ export default function Home({ onStart }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-3 gap-4 h-auto md:h-[800px]">
-          <div className="md:col-span-2 md:row-span-2 rounded-3xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 relative overflow-hidden group hover:shadow-2xl hover:border-primary/30 transition-all duration-500">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="md:col-span-2 md:row-span-2 rounded-3xl p-8 relative overflow-hidden group hover:shadow-2xl hover:border-primary/30 bg-linear-to-br from-accent/10 to-transparent">
+            <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-            <h3 className="text-2xl font-bold mb-2 relative z-10 text-black dark:text-white">
+            <h3 className="text-2xl font-bold mb-2 relative z-10 text-white">
               The Nucleus
             </h3>
             <p className="text-text-muted text-sm mb-8 relative z-10">
@@ -382,16 +382,16 @@ export default function Home({ onStart }) {
               <div className="w-32 h-32 border border-primary/30 rounded-full animate-[spin_10s_linear_infinite]"></div>
               <div className="w-48 h-48 border border-gray-300 dark:border-white/10 rounded-full absolute animate-[spin_15s_linear_infinite_reverse]"></div>
               <div className="w-64 h-64 border border-dashed border-gray-300 dark:border-white/10 rounded-full absolute animate-[spin_20s_linear_infinite]"></div>
-              <div className="w-4 h-4 bg-primary rounded-full absolute shadow-[0_0_30px_rgba(89,65,255,1)]"></div>
+              <div className="w-4 h-4 bg-accent rounded-full absolute shadow-[0_0_30px_rgba(89,65,255,1)]"></div>
             </div>
           </div>
 
-          <div className="md:col-span-1 md:row-span-1 rounded-3xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 hover:shadow-2xl hover:border-primary/30 transition-all duration-500 flex flex-col justify-between group">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Zap className="w-5 h-5 text-primary" />
+          <div className="md:col-span-1 md:row-span-1 rounded-3xl bg-linear-to-br from-accent/10 to-transparent border border-accent/20 p-6 hover:shadow-2xl hover:border-accent/30 transition-all duration-500 flex flex-col justify-between group">
+            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-accent">
+              <Zap className="w-5 h-5 " />
             </div>
             <div>
-              <h4 className="text-lg font-bold text-black dark:text-white">
+              <h4 className="text-lg font-bold text-white">
                 Instant Pivots
               </h4>
               <p className="text-xs text-text-muted mt-1">
@@ -400,12 +400,12 @@ export default function Home({ onStart }) {
             </div>
           </div>
 
-          <div className="md:col-span-1 md:row-span-1 rounded-3xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 hover:shadow-2xl hover:border-primary/30 transition-all duration-500 flex flex-col justify-between group">
-            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Layers className="w-5 h-5 text-accent" />
+          <div className="md:col-span-1 md:row-span-1 rounded-3xl bg-linear-to-br from-accent/10 to-transparent border border-accent/20 p-6 hover:shadow-2xl hover:border-accent/30 transition-all duration-500 flex flex-col justify-between group">
+            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-accent">
+              <Layers className="w-5 h-5 " />
             </div>
             <div>
-              <h4 className="text-lg font-bold text-black dark:text-white">
+              <h4 className="text-lg font-bold text-white">
                 Scale Vectors
               </h4>
               <p className="text-xs text-text-muted mt-1">
@@ -414,14 +414,14 @@ export default function Home({ onStart }) {
             </div>
           </div>
 
-          <div className="md:col-span-2 md:row-span-1 rounded-3xl bg-gray-50 dark:bg-[#0a0a0c] border border-gray-200 dark:border-gray-800 p-6 font-mono text-xs overflow-hidden relative hover:shadow-2xl hover:border-primary/30 transition-all duration-500">
-            <div className="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-gray-50 dark:from-[#0a0a0c] to-transparent z-10"></div>
-            <div className="opacity-70 dark:opacity-50">
+          <div className="md:col-span-2 md:row-span-1 rounded-3xl bg-linear-to-br from-accent/10 to-transparent border border-accent/20 p-6 font-mono text-xs overflow-hidden relative hover:shadow-2xl hover:border-accent/30 transition-all duration-500">
+            <div className="absolute top-0 left-0 w-full h-8 bg-linear-to-b from-gray-900 dark:from-[#0a0a0c] to-transparent z-10"></div>
+            <div className="opacity-70">
               <p className="text-gray-500 dark:text-gray-500">
                 // Elemental Analysis
               </p>
               <p className="text-primary">const</p>
-              <p className="text-gray-900 dark:text-white inline">
+              <p className="text-white inline">
                 {" "}
                 vision
               </p> = <p className="text-accent inline">"SaaS Platform"</p>;
@@ -447,15 +447,15 @@ export default function Home({ onStart }) {
               {"}"}
               <br />
               <br />
-              <p className="text-gray-500 dark:text-gray-500">// Output:</p>
+              <p className="text-accent dark:text-gray-500">// Output:</p>
               <p className="text-gray-900 dark:text-white">
                 {"> "}Opportunity Found: 94%
               </p>
             </div>
-            <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-gray-50 dark:from-[#0a0a0c] to-transparent z-10"></div>
+            <div className="absolute bottom-0 left-0 w-full h-16 bg-linear-to-t from-accent/10 to-transparent z-10"></div>
           </div>
 
-          <div className="md:col-span-4 md:row-span-1 rounded-3xl bg-gradient-to-r from-primary/20 to-accent/20 border border-gray-200 dark:border-gray-800 p-8 flex items-center justify-between relative overflow-hidden group hover:shadow-2xl hover:border-primary/30 transition-all duration-500">
+          <div className="md:col-span-4 md:row-span-1 rounded-3xl bg-linear-to-r from-primary/20 to-accent/20 border border-accent/20 p-8 flex items-center justify-between relative overflow-hidden group hover:shadow-2xl hover:border-accent/30 transition-all duration-500">
             <div className="relative z-10 max-w-lg">
               <h3 className="text-2xl font-bold mb-2 text-text dark:text-white">
                 Hidden Opportunities
@@ -473,7 +473,7 @@ export default function Home({ onStart }) {
                 <ArrowRight className="w-6 h-6" />
               </button>
             </div>
-            <div className="absolute top-0 bottom-0 w-[1px] bg-white/20 left-0 animate-[marquee_5s_linear_infinite] opacity-20"></div>
+            <div className="absolute top-0 bottom-0 w-px bg-white/20 left-0 animate-[marquee_5s_linear_infinite] opacity-20"></div>
           </div>
         </div>
       </section>
@@ -532,7 +532,7 @@ export default function Home({ onStart }) {
                 ].map((t, i) => (
                   <div
                     key={`${setIndex}-${i}`}
-                    className="w-[400px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 flex-shrink-0 hover:shadow-xl transition-all duration-300"
+                    className="w-[400px]  bg-linear-to-br from-accent/10 to-transparent border border-accent/20 rounded-2xl p-8 shrink-0 hover:shadow-xl transition-all duration-300"
                   >
                     <div className="flex items-center gap-1 mb-4">
                       {[...Array(5)].map((_, j) => (
@@ -546,7 +546,7 @@ export default function Home({ onStart }) {
                       "{t.quote}"
                     </p>
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
+                      <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
                         {t.author.charAt(0)}
                       </div>
                       <div>
@@ -573,7 +573,7 @@ export default function Home({ onStart }) {
             <h2 className="text-4xl md:text-6xl font-bold text-text tracking-tight dark:text-white">
               Start Where You Are.
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary via-accent to-primary">
                 Grow Element by Element.
               </span>
             </h2>
@@ -603,7 +603,7 @@ export default function Home({ onStart }) {
             >
               Watch Demo
             </motion.button>*/}
-          </div> 
+          </div>
 
           {/* Trust Indicators */}
           <div className="space-y-4 pt-8">
@@ -628,7 +628,7 @@ export default function Home({ onStart }) {
                 {[...Array(5)].map((_, i) => (
                   <div
                     key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-white dark:border-gray-900 flex items-center justify-center text-white font-bold text-sm"
+                    className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-accent border-2 border-white dark:border-gray-900 flex items-center justify-center text-white font-bold text-sm"
                   >
                     {String.fromCharCode(65 + i)}
                   </div>

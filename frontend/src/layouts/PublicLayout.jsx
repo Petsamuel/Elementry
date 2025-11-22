@@ -48,7 +48,7 @@ export default function PublicLayout({ children, onLogin, onNavigate }) {
             className="flex items-center gap-2 cursor-pointer group"
             onClick={() => handleNavClick("home")}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-purple-600 rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 bg-linear-to-br from-accent to-transparent rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-accent/20 group-hover:scale-105 transition-transform">
               E
             </div>
             <span className="font-bold text-2xl tracking-tight">ELEMENTAL</span>

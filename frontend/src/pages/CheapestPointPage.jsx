@@ -209,7 +209,7 @@ export default function CheapestPointPage() {
                 key={i}
                 className="flex items-start gap-3 p-3 rounded-xl hover:bg-bg-secondary transition-colors"
               >
-                <div className="mt-0.5 w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                <div className="mt-0.5 w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
                 </div>
                 <span className="text-text-muted font-medium text-sm leading-tight">
@@ -225,7 +225,7 @@ export default function CheapestPointPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="lg:col-span-5 bg-gradient-to-br from-primary/5 to-transparent border border-primary/10 rounded-3xl p-8 relative overflow-hidden"
+          className="lg:col-span-5 bg-linear-to-br from-primary/5 to-transparent border border-primary/10 rounded-3xl p-8 relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
 
@@ -243,7 +243,7 @@ export default function CheapestPointPage() {
                 )}
 
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 ${
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 ${
                     step.status === "current"
                       ? "bg-primary text-white shadow-lg shadow-primary/25"
                       : "bg-card-bg border border-border-light text-text-muted"

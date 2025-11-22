@@ -30,7 +30,7 @@ const SidebarContent = ({
   <>
     <div className="p-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-primary rounded-lg flex-shrink-0 flex items-center justify-center text-white font-bold">
+        <div className="w-8 h-8 bg-accent rounded-lg shrink-0 flex items-center justify-center text-white font-bold">
           E
         </div>
         {expanded && (
