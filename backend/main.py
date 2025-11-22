@@ -24,7 +24,9 @@ origins = [
     "http://localhost:5173",
     "http://localhost:5174",
     "https://elementry.vercel.app",
+    "https://www.elementry.vercel.app",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
