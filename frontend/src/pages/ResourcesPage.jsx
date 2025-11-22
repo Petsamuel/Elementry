@@ -175,12 +175,12 @@ export default function ResourcesPage() {
                 }`}
               >
                 {/* Hover Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                 <div
                   className={`relative z-10 ${
                     viewMode === "list"
-                      ? "flex-shrink-0"
+                      ? "shrink-0"
                       : "mb-4 flex justify-between items-start"
                   }`}
                 >

@@ -289,7 +289,7 @@ export default function PivotPage() {
               transition={{ delay: 0.2 }}
               className="relative group bg-obsidian border border-white/5 rounded-xl overflow-hidden p-6"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-4">
                   <Activity className="w-5 h-5 text-primary" />
@@ -502,7 +502,7 @@ export default function PivotPage() {
                       className="sticky top-6 bg-obsidian border border-white/5 rounded-xl overflow-hidden"
                     >
                       {/* Header */}
-                      <div className="p-6 border-b border-white/5 bg-gradient-to-br from-accent/5 to-transparent">
+                      <div className="p-6 border-b border-white/5 bg-linear-to-br from-accent/5 to-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <RefreshCw
                             className={`w-4 h-4 text-accent ${
@@ -889,7 +889,7 @@ export default function PivotPage() {
 
                 <div className="relative pl-4 pt-2">
                   {/* Vertical Line */}
-                  <div className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-primary/50 via-white/10 to-transparent" />
+                  <div className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-linear-to-b from-primary/50 via-white/10 to-transparent" />
 
                   <div className="space-y-8">
                     {selectedPivot.analysis?.milestones?.map((milestone, i) => (

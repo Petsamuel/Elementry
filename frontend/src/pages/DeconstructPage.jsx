@@ -307,7 +307,7 @@ export default function DeconstructPage() {
                 transition={{ delay: 0.1 }}
                 className="lg:col-span-1 lg:row-span-2 relative group bg-obsidian border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-500 p-6"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10 h-full flex flex-col">
                   <div className="flex items-center gap-2 mb-6">
                     <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
@@ -390,7 +390,7 @@ export default function DeconstructPage() {
                 transition={{ delay: 0.2 }}
                 className="lg:col-span-2 relative group bg-obsidian border border-white/5 rounded-xl overflow-hidden hover:border-accent/30 transition-all duration-500 p-6"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10 flex items-start gap-4">
                   <div className="p-3 rounded-xl bg-accent/10 border border-accent/20 group-hover:scale-110 transition-transform duration-300">
                     <Rocket className="w-6 h-6 text-accent" />
@@ -416,7 +416,7 @@ export default function DeconstructPage() {
                 transition={{ delay: 0.3 }}
                 className="lg:col-span-2 lg:row-span-2 relative group bg-obsidian border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-500 p-6"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10 h-full flex flex-col">
                   <div className="flex items-center gap-2 mb-6">
                     <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
@@ -508,7 +508,7 @@ export default function DeconstructPage() {
                 transition={{ delay: 0.4 }}
                 className="relative group bg-obsidian border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-500 p-6"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10 flex items-start gap-4">
                   <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 group-hover:scale-110 transition-transform duration-300">
                     <Target className="w-6 h-6 text-primary" />
@@ -535,8 +535,8 @@ export default function DeconstructPage() {
                   transition={{ delay: 0.5 }}
                   className="relative group bg-obsidian border border-white/5 rounded-xl overflow-hidden hover:border-accent/50 transition-all duration-500 p-6 flex flex-col items-center justify-center text-center"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(200,255,22,0.1),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-linear-to-br from-accent/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-[radial-linear(circle_at_center,rgba(200,255,22,0.1),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   <div className="relative z-10">
                     <div className="p-4 rounded-full bg-white/5 border border-white/10 mb-4 mx-auto group-hover:border-accent/30 group-hover:shadow-[0_0_20px_rgba(200,255,22,0.2)] transition-all duration-500">
@@ -549,7 +549,7 @@ export default function DeconstructPage() {
                       COMPOSITE_SCORE
                     </p>
                     <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 group-hover:from-accent group-hover:to-primary transition-all duration-500">
+                      <span className="text-6xl font-bold text-transparent bg-clip-text bg-linear-to-r from-white to-gray-400 group-hover:from-accent group-hover:to-primary transition-all duration-500">
                         {results.overall_score}
                       </span>
                       <span className="text-text-muted text-xl font-mono">
@@ -623,8 +623,8 @@ export default function DeconstructPage() {
                       className="group relative bg-obsidian border border-white/5 rounded-xl overflow-hidden hover:border-accent/50 transition-all duration-500"
                     >
                       {/* Holographic Overlay Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                      <div className="absolute -inset-1 bg-gradient-to-r from-accent/0 via-accent/10 to-accent/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                      <div className="absolute -inset-1 bg-linear-to-r from-accent/0 via-accent/10 to-accent/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500" />
 
                       <div className="relative z-10 p-6 flex flex-col h-full">
                         {/* Header */}
@@ -704,7 +704,7 @@ export default function DeconstructPage() {
                 transition={{ delay: 0.8 }}
                 className="relative group bg-obsidian border border-white/5 rounded-xl overflow-hidden p-6"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-6">
