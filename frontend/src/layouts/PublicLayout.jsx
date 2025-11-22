@@ -106,7 +106,6 @@ export default function PublicLayout({ children, onLogin, onNavigate }) {
 
           {/* Mobile Toggle */}
           <div className="md:hidden flex items-center gap-4">
-          
             <button
               className="text-text"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -181,8 +180,8 @@ export default function PublicLayout({ children, onLogin, onNavigate }) {
                   }}
                   className="flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-xl text-center font-bold"
                 >
-                  <img src={googleLogo} alt="Google" className="w-5 h-5" />
-                  Sign in with Google
+                 {/* <img src={googleLogo} alt="Google" className="w-5 h-5" /> */}
+                  Sign in with Google 
                 </button>
               )}
             </div>
@@ -267,14 +266,20 @@ export default function PublicLayout({ children, onLogin, onNavigate }) {
             <h4 className="font-bold mb-6 text-white">Legal</h4>
             <ul className="space-y-4 text-sm text-gray-400">
               <li>
-                <a href="#" className="hover:text-accent">
+                <button
+                  onClick={() => handleNavClick("privacy")}
+                  className="hover:text-accent"
+                >
                   Privacy
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-accent">
+                <button
+                  onClick={() => handleNavClick("terms")}
+                  className="hover:text-accent"
+                >
                   Terms
-                </a>
+                </button>
               </li>
             </ul>
           </div>

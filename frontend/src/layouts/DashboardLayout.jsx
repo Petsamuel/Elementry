@@ -158,7 +158,7 @@ export default function DashboardLayout({ children, onLogout }) {
       <motion.aside
         initial={false}
         animate={{ width: desktopSidebarExpanded ? 280 : 80 }}
-        className="bg-card-bg backdrop-blur-xl flex-shrink-0 z-20 hidden md:flex flex-col transition-colors duration-300 border-r border-border-light"
+        className="bg-card-bg backdrop-blur-xl shrink-0 z-20 hidden md:flex flex-col transition-colors duration-300 border-r border-border-light"
       >
         <SidebarContent
           isMobile={false}
