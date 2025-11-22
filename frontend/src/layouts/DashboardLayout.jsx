@@ -177,7 +177,7 @@ export default function DashboardLayout({ children, onLogout }) {
         {/* Mobile Header */}
         <header className="md:hidden h-16 border-b border-border-light flex items-center justify-between px-4 bg-card-bg backdrop-blur text-text">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
+            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white font-bold">
               E
             </div>
             <span className="font-bold text-lg">ELEMENTAL</span>
@@ -195,7 +195,7 @@ export default function DashboardLayout({ children, onLogout }) {
         <main className="flex-1 overflow-y-auto p-6 md:p-10 relative">
           {/* Background Gradients */}
           <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-50 dark:opacity-100">
-            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
+            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px]" />
             <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px]" />
           </div>
 

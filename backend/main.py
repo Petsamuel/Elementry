@@ -18,15 +18,10 @@ project_cache = {}
 CACHE_TTL = 60 * 5  # 5 minutes
 
 # CORS Configuration
-origins = [
-    "http://localhost:5173",  # Vite default port
-    "http://localhost:3000",
-    "https://elementry.vercel.app/"
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
