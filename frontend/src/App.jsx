@@ -14,6 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import DashboardOverview from "./pages/DashboardOverview";
 import DeconstructPage from "./pages/DeconstructPage";
 import PivotPage from "./pages/PivotPage";
+import CheapestPointPage from "./pages/CheapestPointPage";
+import ResourcesPage from "./pages/ResourcesPage";
 import SavedProjectsPage from "./pages/SavedProjectsPage";
 import Home from "./pages/Home";
 import FeaturesPage from "./pages/FeaturesPage";
@@ -126,6 +128,8 @@ function AppContent() {
             {currentPage === "dashboard" && <DashboardOverview />}
             {currentPage === "deconstruct" && <DeconstructPage />}
             {currentPage === "pivot" && <PivotPage />}
+            {currentPage === "cheapest" && <CheapestPointPage />}
+            {currentPage === "resources" && <ResourcesPage />}
             {currentPage === "saved" && <SavedProjectsPage />}
             {/* Legacy route - can be removed later */}
             {currentPage === "old-dashboard" && <Dashboard />}

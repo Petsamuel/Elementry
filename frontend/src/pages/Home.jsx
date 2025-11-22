@@ -590,20 +590,20 @@ export default function Home({ onStart }) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onStart}
-              className="group px-10 py-5 bg-accent hover:bg-accent-hover text-white rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3"
+              className="group px-10 py-5 bg-accent hover:bg-accent-hover text-black rounded-xl font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-3"
             >
               Deconstruct My Business
               <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </motion.button>
 
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="px-10 py-5 border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold text-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
             >
               Watch Demo
-            </motion.button>
-          </div>
+            </motion.button>*/}
+          </div> 
 
           {/* Trust Indicators */}
           <div className="space-y-4 pt-8">

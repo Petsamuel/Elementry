@@ -238,7 +238,7 @@ export default function PivotPage() {
       >
         <div className="flex items-center justify-between lg:flex-row flex-col">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-accent/20 to-green-500/20 backdrop-blur-sm border border-accent/20">
+            <div className="p-3 rounded-xl bg-linear-to-br from-accent/20 to-green-500/20 backdrop-blur-sm border border-accent/20">
               <GitBranch className="w-6 h-6 text-accent" />
             </div>
             <div>
@@ -299,8 +299,25 @@ export default function PivotPage() {
                   </span>
                 </div>
                 <p className="text-gray-300 leading-relaxed text-lg overflow-hidden text-pretty text-ellipsis truncate">
-                  {projectData.name} 
+                  {projectData.name}
                 </p>
+                {projectData.cheapest_entry_point && (
+                  <div className="mt-4 pt-4 border-t border-white/5">
+                    <div className="flex items-start gap-2">
+                      <div className="p-1.5 rounded-lg bg-green-500/10 text-green-400 mt-0.5">
+                        <DollarSign className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                          Cheapest Entry Point
+                        </h4>
+                        <p className="text-sm text-gray-200">
+                          {projectData.cheapest_entry_point}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -652,6 +669,28 @@ export default function PivotPage() {
                               <p className="text-sm font-medium text-white">
                                 {selectedPivot.analysis.estimated_investment}
                               </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Required Resources */}
+                        {selectedPivot.analysis?.required_resources && (
+                          <div className="p-4 rounded-lg bg-white/5 border border-white/5">
+                            <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                              <LayoutGrid className="w-4 h-4 text-accent" />
+                              Required Resources
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedPivot.analysis.required_resources.map(
+                                (resource, i) => (
+                                  <span
+                                    key={i}
+                                    className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs text-gray-300"
+                                  >
+                                    {resource}
+                                  </span>
+                                )
+                              )}
                             </div>
                           </div>
                         )}

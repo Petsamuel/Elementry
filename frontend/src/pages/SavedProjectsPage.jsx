@@ -172,7 +172,7 @@ export default function SavedProjectsPage() {
                         <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
                           <FolderHeart className="w-5 h-5 text-primary" />
                         </div>
-                        <span className="font-bold text-white text-sm md:text-base  text-ellipsis">
+                        <span className="font-bold text-white text-sm md:text-base text-ellipsis overflow-hidden whitespace-nowrap max-w-[150px] md:max-w-[200px]">
                           {project.name}
                         </span>
                       </div>

@@ -361,110 +361,27 @@ def get_project(uid: str, project_id: str) -> Optional[Dict]:
 
 def create_pivot(uid: str, pivot_data: Dict) -> str:
     """
-    Create a new pivot for user with AI-generated analysis
+    Create a new pivot for user.
+    Expects pivot_data to contain 'analysis' field.
     Returns: pivot_id
     """
-    import random
     db = get_db()
     if not db:
         return "mock-pivot-id"
     
     pivots_ref = db.collection('users').document(uid).collection('pivots')
     
-    # Generate AI-powered analysis
-    pivot_name = pivot_data.get('pivot_name', '')
-    
-    # Calculate viability score (0-100)
-    viability_score = random.randint(70, 95)
-    
-    # Determine market fit
-    market_fit_levels = ["High", "Medium-High", "Medium", "Growing"]
-    market_fit = random.choice(market_fit_levels)
-    market_fit_score = random.randint(65, 90)
-    
-    # Generate recommended actions with priorities
-    action_templates = [
-        {"action": f"Validate target market for {pivot_name}", "priority": "high", "completed": False},
-        {"action": "Conduct customer interviews with potential users", "priority": "high", "completed": False},
-        {"action": "Analyze competitor positioning in this space", "priority": "medium", "completed": False},
-        {"action": "Develop MVP feature set", "priority": "medium", "completed": False},
-        {"action": "Test pricing strategy with early adopters", "priority": "high", "completed": False},
-        {"action": "Build landing page for market validation", "priority": "low", "completed": False},
-        {"action": "Create content strategy for target audience", "priority": "medium", "completed": False}
-    ]
-    recommended_actions = random.sample(action_templates, 4)
-    
-    # Calculate timeline
-    timeline_weeks = random.randint(8, 24)
-    timeline = f"{timeline_weeks} weeks"
-    investment = f"${random.randint(5, 50)}k"
-    
-    # Risk assessment
-    risk_levels = ["Low", "Medium", "Medium-High"]
-    risk_level = random.choice(risk_levels)
-    risk_factors = [
-        "Market validation needed",
-        "Competition analysis required",
-        "Technical feasibility to assess",
-        "Customer acquisition cost unknown",
-        "Regulatory considerations"
-    ]
-    selected_risks = random.sample(risk_factors, 2)
-    
-    # Milestones
-    milestones = [
-        {
-            "name": "Market Validation Complete",
-            "due_weeks": int(timeline_weeks * 0.25),
-            "status": "pending",
-            "description": "Validate market demand and customer pain points"
-        },
-        {
-            "name": "MVP Development",
-            "due_weeks": int(timeline_weeks * 0.5),
-            "status": "pending",
-            "description": "Build minimum viable product"
-        },
-        {
-            "name": "Beta Launch",
-            "due_weeks": int(timeline_weeks * 0.75),
-            "status": "pending",
-            "description": "Launch to early adopters"
-        },
-        {
-            "name": "First Paying Customer",
-            "due_weeks": timeline_weeks,
-            "status": "pending",
-            "description": "Acquire first revenue"
-        }
-    ]
-    
-    # Add comprehensive analysis data
-    pivot_data['analysis'] = {
-        'viability_score': viability_score,
-        'market_fit': market_fit,
-        'market_fit_score': market_fit_score,
-        'recommended_actions': recommended_actions,
-        'estimated_timeline': timeline,
-        'estimated_timeline_weeks': timeline_weeks,
-        'estimated_investment': investment,
-        'risk_level': risk_level,
-        'risk_factors': selected_risks,
-        'milestones': milestones,
-        
-        # Progress tracking
-        'status': 'active',  # active, in_progress, completed, on_hold
-        'progress_percentage': 0,
-        'actions_completed': 0,
-        'actions_total': len(recommended_actions),
-        'current_week': 0,
-        'started_at': None  # Will be set when user marks first action complete
-    }
-    
     # Add metadata
     pivot_data['created_at'] = firestore.SERVER_TIMESTAMP
     pivot_data['status'] = 'active'
     
+    # Ensure analysis status is set if not present
+    if 'analysis' in pivot_data:
+        if 'status' not in pivot_data['analysis']:
+            pivot_data['analysis']['status'] = 'active'
+        if 'progress_percentage' not in pivot_data['analysis']:
+            pivot_data['analysis']['progress_percentage'] = 0
+            
     # Create pivot
     pivot_ref = pivots_ref.document()
     pivot_ref.set(pivot_data)

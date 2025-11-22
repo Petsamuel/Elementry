@@ -29,3 +29,15 @@ class ActionUpdateRequest(BaseModel):
 
 class StatusUpdateRequest(BaseModel):
     status: str  # "active", "in_progress", "completed", "on_hold", "abandoned"
+
+class PivotAnalysisResult(BaseModel):
+    viability_score: int
+    market_fit: str
+    market_fit_score: int
+    recommended_actions: List[dict]  # {"action": str, "priority": str}
+    required_resources: List[str]
+    estimated_timeline: str
+    estimated_investment: str
+    risk_level: str
+    risk_factors: List[str]
+    milestones: List[dict]  # {"name": str, "due_weeks": int, "description": str}

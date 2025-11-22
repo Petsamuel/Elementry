@@ -203,8 +203,8 @@ export default function DeconstructPage() {
         className="space-y-2"
       >
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 backdrop-blur-sm border border-primary/20">
-            <Sparkles className="w-6 h-6 text-primary" />
+          <div className="p-3 rounded-xl bg-linear-to-br from-accent/20 to-green-500/20 backdrop-blur-sm border border-accent/20">
+            <Sparkles className="w-6 h-6 text-accent" />
           </div>
           <h1 className="text-4xl font-bold text-text">
             Deconstruct Your Idea

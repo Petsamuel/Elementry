@@ -2,7 +2,7 @@ import os
 import json
 import google.generativeai as genai
 from dotenv import load_dotenv
-from models import DeconstructionResult, BusinessElement
+from models import DeconstructionResult, BusinessElement, PivotAnalysisResult
 
 load_dotenv()
 
@@ -100,3 +100,86 @@ def _get_mock_data(idea: str) -> DeconstructionResult:
         sustainability_tip="Start small, reinvest profits from the cheapest entry point."
     )
 
+
+async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotAnalysisResult:
+    """
+    Generates a detailed analysis for a pivot opportunity using Google Gemini.
+    """
+    if not GENAI_API_KEY:
+        print("WARNING: No GEMINI_API_KEY found. Using mock data for pivot.")
+        return _get_mock_pivot_data(pivot_name)
+
+    model = genai.GenerativeModel('gemini-1.5-pro')
+
+    prompt = f"""
+        You are an expert business strategist.
+        Original Business Idea: "{original_idea}"
+        Proposed Pivot: "{pivot_name}"
+
+        Analyze this pivot opportunity and provide a detailed execution plan.
+        
+        Guidelines:
+        - Viability Score: 0-100 assessment of success probability.
+        - Market Fit: "High", "Medium-High", "Medium", "Growing", or "Low".
+        - Market Fit Score: 0-100.
+        - Recommended Actions: 5-7 specific, actionable steps to execute this pivot. Assign priority (High/Medium/Low).
+        - Required Resources: List 3-5 key resources needed (e.g., "Full-stack Developer", "$10k Marketing Budget", "Legal Counsel").
+        - Estimated Timeline: e.g., "12 weeks", "6 months".
+        - Estimated Investment: e.g., "$5k - $10k".
+        - Risk Level: "Low", "Medium", "High".
+        - Risk Factors: 3-5 potential risks.
+        - Milestones: 4 key milestones with due_weeks (offset from start) and description.
+
+        Output STRICTLY in raw JSON format matching this schema:
+        {{
+            "viability_score": int,
+            "market_fit": "string",
+            "market_fit_score": int,
+            "recommended_actions": [
+                {{"action": "string", "priority": "High|Medium|Low"}}
+            ],
+            "required_resources": ["string", "string"],
+            "estimated_timeline": "string",
+            "estimated_investment": "string",
+            "risk_level": "string",
+            "risk_factors": ["string", "string"],
+            "milestones": [
+                {{"name": "string", "due_weeks": int, "description": "string"}}
+            ]
+        }}
+        """
+
+    try:
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        if text.startswith("```json"):
+            text = text[7:]
+        if text.endswith("```"):
+            text = text[:-3]
+            
+        data = json.loads(text)
+        return PivotAnalysisResult(**data)
+    except Exception as e:
+        print(f"Error calling Gemini for pivot: {e}")
+        return _get_mock_pivot_data(pivot_name)
+
+def _get_mock_pivot_data(pivot_name: str) -> PivotAnalysisResult:
+    return PivotAnalysisResult(
+        viability_score=85,
+        market_fit="Medium-High",
+        market_fit_score=78,
+        recommended_actions=[
+            {"action": f"Validate demand for {pivot_name}", "priority": "High"},
+            {"action": "Build MVP", "priority": "High"},
+            {"action": "Launch marketing campaign", "priority": "Medium"}
+        ],
+        required_resources=["Developer", "Designer", "$500 Ad Budget"],
+        estimated_timeline="12 weeks",
+        estimated_investment="$5k",
+        risk_level="Medium",
+        risk_factors=["Competitor response", "Market adoption"],
+        milestones=[
+            {"name": "Validation", "due_weeks": 2, "description": "Confirm market interest"},
+            {"name": "Launch", "due_weeks": 12, "description": "Release to public"}
+        ]
+    )
