@@ -15,6 +15,11 @@ import {
   Loader2,
   Sparkles,
   RefreshCw,
+  AlertTriangle,
+  Clock,
+  DollarSign,
+  Circle,
+  CheckCircle,
 } from "lucide-react";
 
 export default function PivotPage() {
@@ -73,11 +78,40 @@ export default function PivotPage() {
       const token = await user.getIdToken();
       createPivotMutation.mutate({
         pivotName: selectedPivot.pivot_name,
-        projectId: projectData.id, // Use projectData.id which is the document ID
+        projectId: projectData.id,
         token,
       });
     } catch (error) {
       console.error("Error activating pivot:", error);
+    }
+  };
+
+  // Helper function to get risk color
+  const getRiskColor = (risk) => {
+    switch (risk?.toLowerCase()) {
+      case "low":
+        return "text-green-400";
+      case "medium":
+        return "text-yellow-400";
+      case "medium-high":
+      case "high":
+        return "text-orange-400";
+      default:
+        return "text-gray-400";
+    }
+  };
+
+  // Helper function to get priority badge color
+  const getPriorityColor = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case "high":
+        return "bg-red-500/20 text-red-400 border-red-500/30";
+      case "medium":
+        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      case "low":
+        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
     }
   };
 
@@ -137,7 +171,7 @@ export default function PivotPage() {
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-primary" />
             <h3 className="font-bold text-white">Current Trajectory</h3>
-            <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded ml-2">
+            <span className="text-xs font-mono text-accent bg-primary/10 px-2 py-1 rounded ml-2">
               ACTIVE
             </span>
           </div>
@@ -184,10 +218,15 @@ export default function PivotPage() {
                         <h4 className="font-medium mb-1 text-accent">
                           {pivot.pivot_name}
                         </h4>
-                        <p className="text-sm text-gray-400 leading-relaxed">
-                          Simulation Active • Created{" "}
-                          {new Date(pivot.created_at).toLocaleDateString()}
-                        </p>
+                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                          <span>
+                            Viability: {pivot.analysis?.viability_score || 0}%
+                          </span>
+                          <span>•</span>
+                          <span>
+                            {pivot.analysis?.progress_percentage || 0}% Complete
+                          </span>
+                        </div>
                       </div>
                       <div className="self-center">
                         <ArrowRight className="w-5 h-5 text-accent" />
@@ -265,7 +304,8 @@ export default function PivotPage() {
                     <span className="text-xs font-mono text-accent">
                       {selectedPivot.isPreview
                         ? "PREVIEW_MODE"
-                        : "SIMULATION_ACTIVE"}
+                        : selectedPivot.analysis?.status?.toUpperCase() ||
+                          "SIMULATION_ACTIVE"}
                     </span>
                   </div>
                   <h3 className="text-lg font-bold text-white">
@@ -273,7 +313,8 @@ export default function PivotPage() {
                   </h3>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 max-h-full overflow-y-auto">
+                  {/* Metrics */}
                   <div className="space-y-4">
                     <div className="p-4 rounded-lg bg-white/5 border border-white/5">
                       <div className="flex items-center justify-between mb-2">
@@ -281,13 +322,17 @@ export default function PivotPage() {
                           Viability Score
                         </span>
                         <span className="text-accent font-mono font-bold">
-                          85/100
+                          {selectedPivot.analysis?.viability_score || 0}/100
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-accent"
-                          style={{ width: "85%" }}
+                          className="h-full bg-accent transition-all duration-500"
+                          style={{
+                            width: `${
+                              selectedPivot.analysis?.viability_score || 0
+                            }%`,
+                          }}
                         />
                       </div>
                     </div>
@@ -298,40 +343,208 @@ export default function PivotPage() {
                           Market Fit
                         </span>
                         <span className="text-primary font-mono font-bold">
-                          High
+                          {selectedPivot.analysis?.market_fit || "Analyzing..."}
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-primary"
-                          style={{ width: "75%" }}
+                          className="h-full bg-primary transition-all duration-500"
+                          style={{
+                            width: `${
+                              selectedPivot.analysis?.market_fit_score || 0
+                            }%`,
+                          }}
                         />
                       </div>
                     </div>
+
+                    {/* Progress (for active simulations) */}
+                    {!selectedPivot.isPreview && (
+                      <div className="p-4 rounded-lg bg-accent/5 border border-accent/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-accent flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Progress
+                          </span>
+                          <span className="text-accent font-mono font-bold">
+                            {selectedPivot.analysis?.progress_percentage || 0}%
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-accent transition-all duration-500"
+                            style={{
+                              width: `${
+                                selectedPivot.analysis?.progress_percentage || 0
+                              }%`,
+                            }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">
+                          Week {selectedPivot.analysis?.current_week || 0} of{" "}
+                          {selectedPivot.analysis?.estimated_timeline_weeks ||
+                            0}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
+                  {/* Risk Assessment */}
+                  {selectedPivot.analysis?.risk_level && (
+                    <div className="p-4 rounded-lg bg-white/5 border border-white/5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <AlertTriangle
+                          className={`w-4 h-4 ${getRiskColor(
+                            selectedPivot.analysis.risk_level
+                          )}`}
+                        />
+                        <h4 className="text-sm font-bold text-white">
+                          Risk Assessment
+                        </h4>
+                        <span
+                          className={`text-xs font-mono ${getRiskColor(
+                            selectedPivot.analysis.risk_level
+                          )}`}
+                        >
+                          {selectedPivot.analysis.risk_level?.toUpperCase()}
+                        </span>
+                      </div>
+                      <ul className="space-y-1">
+                        {(selectedPivot.analysis.risk_factors || []).map(
+                          (risk, i) => (
+                            <li
+                              key={i}
+                              className="text-xs text-gray-400 flex items-start gap-2"
+                            >
+                              <span className="text-orange-400 mt-0.5">•</span>
+                              {risk}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Recommended Actions */}
                   <div className="space-y-3">
                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
                       <Target className="w-4 h-4 text-gray-400" />
                       Recommended Actions
                     </h4>
                     <ul className="space-y-2">
-                      {[
-                        "Validate new customer segment",
-                        "Adjust pricing model",
-                        "Update landing page copy",
-                      ].map((action, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start gap-2 text-sm text-gray-400"
-                        >
-                          <CheckCircle2 className="w-4 h-4 text-accent/50 mt-0.5 flex-shrink-0" />
-                          {action}
-                        </li>
-                      ))}
+                      {(selectedPivot.analysis?.recommended_actions || []).map(
+                        (actionItem, i) => {
+                          const action =
+                            typeof actionItem === "string"
+                              ? actionItem
+                              : actionItem.action;
+                          const priority =
+                            typeof actionItem === "object"
+                              ? actionItem.priority
+                              : "medium";
+                          const completed =
+                            typeof actionItem === "object"
+                              ? actionItem.completed
+                              : false;
+
+                          return (
+                            <li
+                              key={i}
+                              className="flex items-start gap-2 text-sm"
+                            >
+                              {completed ? (
+                                <CheckCircle className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                              ) : (
+                                <Circle className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                              )}
+                              <div className="flex-1">
+                                <p
+                                  className={
+                                    completed
+                                      ? "text-gray-500 line-through"
+                                      : "text-gray-300"
+                                  }
+                                >
+                                  {action}
+                                </p>
+                                {typeof actionItem === "object" && (
+                                  <span
+                                    className={`text-xs px-2 py-0.5 rounded border inline-block mt-1 ${getPriorityColor(
+                                      priority
+                                    )}`}
+                                  >
+                                    {priority}
+                                  </span>
+                                )}
+                              </div>
+                            </li>
+                          );
+                        }
+                      )}
                     </ul>
                   </div>
 
+                  {/* Milestones */}
+                  {selectedPivot.analysis?.milestones && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Target className="w-4 h-4 text-gray-400" />
+                        Milestones
+                      </h4>
+                      <div className="space-y-2">
+                        {selectedPivot.analysis.milestones.map(
+                          (milestone, i) => (
+                            <div
+                              key={i}
+                              className="p-3 rounded-lg bg-white/5 border border-white/5"
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-medium text-white">
+                                  {milestone.name}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  Week {milestone.due_weeks}
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-400">
+                                {milestone.description}
+                              </p>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Estimates */}
+                  {selectedPivot.analysis?.estimated_timeline && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/5">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-400">
+                            Timeline
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-white">
+                          {selectedPivot.analysis.estimated_timeline}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/5">
+                        <div className="flex items-center gap-2 mb-1">
+                          <DollarSign className="w-4 h-4 text-gray-400" />
+                          <span className="text-xs text-gray-400">
+                            Investment
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-white">
+                          {selectedPivot.analysis.estimated_investment}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Button */}
                   <div className="pt-4 border-t border-white/5">
                     <button
                       onClick={
@@ -339,7 +552,10 @@ export default function PivotPage() {
                           ? handleActivatePivot
                           : undefined
                       }
-                      disabled={createPivotMutation.isPending}
+                      disabled={
+                        createPivotMutation.isPending ||
+                        !selectedPivot.isPreview
+                      }
                       className="w-full btn-primary flex items-center justify-center gap-2 group disabled:opacity-50"
                     >
                       {createPivotMutation.isPending ? (

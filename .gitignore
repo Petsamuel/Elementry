@@ -32,5 +32,5 @@ feature_guideline.md
 .gemini
 GEMINI_RULES.md
 style_guide.md
-
+service-account.json.bak
 backend/service-account.json

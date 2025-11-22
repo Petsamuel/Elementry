@@ -11,12 +11,13 @@ import {
   Sparkles,
   Clock,
   Loader2,
+  GitBranch,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { api } from "../services/api";
 
 export default function DashboardOverview() {
-  const { user, setCurrentPage } = useAuthStore();
+  const { user, setCurrentPage, setSelectedProjectId } = useAuthStore();
 
   // Fetch dashboard stats
   const { data: statsData, isLoading: statsLoading } = useQuery({
@@ -206,30 +207,56 @@ export default function DashboardOverview() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.9 + index * 0.1 }}
-                  className="flex items-center justify-between p-4 rounded-xl bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer group"
+                  className="p-4 rounded-xl bg-accent/5 hover:bg-accent/10 transition-colors group"
                 >
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-text group-hover:text-primary transition-colors">
-                      {project.name}
-                    </h3>
-                    <p className="text-text-muted text-sm">
-                      {formatTimestamp(project.updated_at)}
-                    </p>
+                  {/* Project Info */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-text group-hover:text-primary transition-colors">
+                        {project.name}
+                      </h3>
+                      <p className="text-text-muted text-sm">
+                        {formatTimestamp(project.updated_at)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-sm text-text-muted">Score</p>
+                        <p className="font-bold text-text">
+                          {project.overall_score || 0}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-text-muted">Streams</p>
+                        <p className="font-bold text-text">
+                          {project.revenue_streams_count || 0}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-sm text-text-muted">Score</p>
-                      <p className="font-bold text-text">
-                        {project.overall_score || 0}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-text-muted">Streams</p>
-                      <p className="font-bold text-text">
-                        {project.revenue_streams_count || 0}
-                      </p>
-                    </div>
-                    <ArrowRight className="w-5 h-5 text-text-muted group-hover:text-primary group-hover:translate-x-1 transition-all" />
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 pt-3 border-t border-white/5">
+                    <button
+                      onClick={() => {
+                        setSelectedProjectId(project.id);
+                        setCurrentPage("deconstruct");
+                      }}
+                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-text-muted hover:text-text text-sm font-medium transition-all flex items-center justify-center gap-2"
+                    >
+                      <FolderOpen className="w-4 h-4" />
+                      View
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedProjectId(project.id);
+                        setCurrentPage("pivot");
+                      }}
+                      className="flex-1 px-3 py-2 rounded-lg bg-accent/10 hover:bg-accent/20 text-accent hover:text-accent text-sm font-medium transition-all flex items-center justify-center gap-2"
+                    >
+                      <GitBranch className="w-4 h-4" />
+                      Pivot & Fix
+                    </button>
                   </div>
                 </motion.div>
               ))}
