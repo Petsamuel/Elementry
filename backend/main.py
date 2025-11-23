@@ -75,6 +75,7 @@ async def deconstruct(request: DeconstructionRequest, token_data: dict = Depends
     # Increment usage
     increment_ai_usage(token_data['uid'])
     
+    result = await deconstruct_business_idea(request.idea)
     return result
 
 @app.get("/dashboard/stats")
@@ -307,6 +308,40 @@ async def diagnose_project_endpoint(
         raise HTTPException(status_code=500, detail="Failed to save diagnosis")
         
     return diagnosis_result
+
+@app.get("/projects/{project_id}/board")
+async def get_strategy_board_endpoint(project_id: str, token_data: dict = Depends(get_token)):
+    """Get strategy board for a project"""
+    from firestore_utils import get_strategy_board
+    
+    board = get_strategy_board(token_data['uid'], project_id)
+    if not board:
+        # Return empty structure if not found
+        return {
+            "columns": {
+                "discovery": [],
+                "validation": [],
+                "growth": [],
+                "success": []
+            }
+        }
+    return board
+
+@app.post("/projects/{project_id}/board")
+async def save_strategy_board_endpoint(
+    project_id: str, 
+    board_data: dict, 
+    token_data: dict = Depends(get_token)
+):
+    """Save strategy board state"""
+    from firestore_utils import save_strategy_board
+    
+    success = save_strategy_board(token_data['uid'], project_id, board_data)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to save board")
+        
+    return {"status": "success"}
+
 
 
 if __name__ == "__main__":

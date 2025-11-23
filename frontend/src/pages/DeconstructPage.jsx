@@ -59,7 +59,7 @@ const TabButton = ({ active, onClick, children, icon: Icon }) => (
       />
     )}
     <span className="relative z-10 flex items-center gap-2">
-      {Icon && <Icon className={`w-4 h-4 ${active ? "text-accent" : ""}`} />}
+      {Icon && <Icon className={`w-4 h-4 lg:block hidden ${active ? "text-accent" : ""}`} />}
       {children}
     </span>
   </button>

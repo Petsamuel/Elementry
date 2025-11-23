@@ -121,7 +121,7 @@ export default function SavedProjectsPage() {
                 onClick={() => setFilterStatus(status)}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium capitalize transition-all ${
                   filterStatus === status
-                    ? "bg-primary text-white shadow-lg"
+                    ? "bg-accent text-black shadow-lg"
                     : "text-gray-400 hover:text-white hover:bg-white/5"
                 }`}
               >

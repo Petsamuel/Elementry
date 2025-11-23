@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -15,11 +15,12 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../services/api";
 import toast from "react-hot-toast";
+import confetti from "canvas-confetti";
 import {
   GitBranch,
   Target,
@@ -37,6 +38,13 @@ import {
   TrendingUp,
   Activity,
   Network,
+  BarChart3,
+  ArrowRight,
+  ChevronDown,
+  FolderOpen,
+  RefreshCw,
+  MoveRight,
+  ChevronUp,
 } from "lucide-react";
 import {
   StrategyCard,
@@ -45,6 +53,49 @@ import {
 } from "../components/PivotComponents";
 import EvolutionMap from "../components/EvolutionMap";
 import * as Dialog from "@radix-ui/react-dialog";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+
+// --- Utility Components ---
+
+const TabButton = ({ active, onClick, children, icon: Icon }) => (
+  <button
+    onClick={onClick}
+    className={`relative px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 flex items-center gap-2 ${
+      active ? "text-white" : "text-gray-400 hover:text-white"
+    }`}
+  >
+    {active && (
+      <motion.div
+        layoutId="activeTabPivot"
+        className="absolute inset-0 bg-white/10 border border-white/10 rounded-xl backdrop-blur-md"
+        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+      />
+    )}
+    <span className="relative z-10 flex items-center gap-2">
+      {Icon && <Icon className={`w-4 h-4 ${active ? "text-accent" : ""}`} />}
+      {children}
+    </span>
+  </button>
+);
+
+const Card = ({ children, className = "", delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay }}
+    className={`bg-obsidian border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all duration-500 ${className}`}
+  >
+    {children}
+  </motion.div>
+);
+
+const Badge = ({ children, className = "" }) => (
+  <span
+    className={`px-2 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider border ${className}`}
+  >
+    {children}
+  </span>
+);
 
 const dropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -56,6 +107,37 @@ const dropAnimation = {
   }),
 };
 
+// Custom hook for media query
+const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, [matches, query]);
+
+  return matches;
+};
+
+// Debounce hook for auto-save
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 export default function PivotPage() {
   const { user, selectedProjectId, setSelectedProjectId } = useAuthStore();
   const [activeId, setActiveId] = useState(null);
@@ -63,11 +145,16 @@ export default function PivotPage() {
   const [challenges, setChallenges] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStrategy, setEditingStrategy] = useState(null);
-  const [viewMode, setViewMode] = useState("pipeline"); // 'pipeline' | 'evolution'
+  const [activeTab, setActiveTab] = useState("overview"); // 'overview' | 'board' | 'evolution'
   const [showFixPivotPrompt, setShowFixPivotPrompt] = useState(false);
   const [pendingPromotion, setPendingPromotion] = useState(null); // { id, container }
+  const [isBoardLoaded, setIsBoardLoaded] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(null);
+  const [selectedCardForMove, setSelectedCardForMove] = useState(null);
 
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 1023px)");
+  const saveTimeoutRef = useRef(null);
 
   // Local state for columns
   const [columns, setColumns] = useState({
@@ -77,14 +164,31 @@ export default function PivotPage() {
     success: [], // Completed
   });
 
+  const debouncedColumns = useDebounce(columns, 1000); // Debounce for 1 second
+
   // Fetch project
-  const { data: projectData, isLoading: isLoadingProject } = useQuery({
+  const {
+    data: projectData,
+    isLoading: isLoadingProject,
+    refetch: refetchProject,
+  } = useQuery({
     queryKey: ["project", selectedProjectId],
     queryFn: async () => {
       const token = await user.getIdToken();
       return api.getProject(selectedProjectId, token);
     },
     enabled: !!user && !!selectedProjectId,
+  });
+
+  // Fetch recent projects for selector
+  const { data: recentProjects = [] } = useQuery({
+    queryKey: ["pivotRecentProjects"],
+    queryFn: async () => {
+      const token = await user.getIdToken();
+      const response = await api.getRecentProjects(token);
+      return response.projects || [];
+    },
+    enabled: !!user,
   });
 
   // Initialize columns from project data
@@ -345,254 +449,445 @@ export default function PivotPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 text-white">
-      {/* View Switcher Header */}
-      <div className="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Pivot Engineering
-            </h1>
-            <span className="px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-mono font-bold">
-              BETA
-            </span>
-          </div>
-          <p className="text-gray-400 text-lg">
-            Engineer your business pivots using the strategy board.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
-          <button
-            onClick={() => setViewMode("pipeline")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === "pipeline"
-                ? "bg-accent text-black shadow-lg"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <LayoutGrid className="w-4 h-4" />
-              Pipeline
-            </div>
-          </button>
-          <button
-            onClick={() => setViewMode("evolution")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              viewMode === "evolution"
-                ? "bg-accent text-black shadow-lg"
-                : "text-gray-400 hover:text-white"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Network className="w-4 h-4" />
-              Evolution Map
-            </div>
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen pb-20 text-white space-y-8">
+      {/* Header Section */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10"
+      >
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-3"
+              >
+                <Badge className="bg-accent/10 text-accent border-accent/20">
+                  Pivot Engineering
+                </Badge>
+                <span className="text-xs text-text-muted font-mono">
+                  BETA_MODULE
+                </span>
+              </motion.div>
 
-      {/* Idea Analysis Section (Always Visible or Collapsible) */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="md:col-span-2 p-5 rounded-xl bg-white/5 border border-white/10">
-          <h3 className="text-sm font-bold text-gray-400 uppercase mb-2 flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-yellow-400" /> Executive Summary
-          </h3>
-          <p className="text-sm text-gray-300 leading-relaxed">
-            {projectData?.description ||
-              "An AI-powered platform designed to optimize business pivots through data-driven analysis and strategic vector mapping."}
-          </p>
-        </div>
-        <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-          <h3 className="text-sm font-bold text-gray-400 uppercase mb-2 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-accent" /> Core Value Asset
-          </h3>
-          <p className="text-sm text-white font-bold">
-            {projectData?.core_asset || "Proprietary Pivot Algorithm"}
-          </p>
-        </div>
-        <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-          <h3 className="text-sm font-bold text-gray-400 uppercase mb-2 flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-red-400" /> Critical Risk
-          </h3>
-          <p className="text-sm text-gray-300">
-            {projectData?.risk || "Market adoption latency due to complexity."}
-          </p>
-        </div>
-      </div>
-
-      {viewMode === "evolution" ? (
-        <EvolutionMap projectData={projectData} />
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          {/* Diagnosis Section */}
-          <div className="mb-8">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md">
-              <div className="absolute inset-0 bg-linear-to-r from-accent/5 via-transparent to-transparent opacity-50" />
-              <div className="relative p-6 flex lg:items-center justify-between lg:flex-row flex-col gap-y-5">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-accent/10 text-accent">
-                    <Stethoscope className="w-6 h-6" />
-                  </div>
-                  <div className="">
-                    <h3 className="text-lg font-bold text-white">
-                      AI Diagnosis
-                    </h3>
-                    <p className="text-gray-400 text-sm">
-                      Identify weak links to generate new discovery options.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowDiagnosisForm(true)}
-                  className="btn-primary px-6 py-2 flex items-center gap-2 justify-center"
+              <div className="flex items-center gap-4">
+                <motion.h1
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, type: "spring" }}
+                  className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 truncate"
                 >
-                  <Stethoscope className="w-4 h-4" />
-                  Run Diagnosis
-                </button>
+                  {projectData?.name || "Pivot Engineering"}
+                </motion.h1>
+
+                {/* Project Selector */}
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger asChild>
+                    <button className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-gray-400 hover:text-white">
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Portal>
+                    <DropdownMenu.Content
+                      className="min-w-[200px] bg-[#0A0A0A] border border-white/10 rounded-xl p-1 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-100"
+                      align="start"
+                      sideOffset={5}
+                    >
+                      <div className="px-2 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Switch Project
+                      </div>
+                      {recentProjects?.map((p) => (
+                        <DropdownMenu.Item
+                          key={p.id}
+                          onClick={() => {
+                            setSelectedProjectId(p.id);
+                            // Reset columns on project switch to force reload
+                            setColumns({
+                              discovery: [],
+                              validation: [],
+                              growth: [],
+                              success: [],
+                            });
+                          }}
+                          className={`flex items-center gap-2 px-2 py-2 text-sm rounded-lg cursor-pointer outline-none transition-colors ${
+                            selectedProjectId === p.id
+                              ? "bg-accent/10 text-accent"
+                              : "text-gray-300 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          <FolderOpen className="w-3.5 h-3.5" />
+                          <span className="truncate max-w-[180px]">
+                            {p.name}
+                          </span>
+                          {selectedProjectId === p.id && (
+                            <CheckCircle2 className="w-3.5 h-3.5 ml-auto" />
+                          )}
+                        </DropdownMenu.Item>
+                      ))}
+                      {(!recentProjects || recentProjects.length === 0) && (
+                        <div className="px-2 py-2 text-xs text-gray-500 italic">
+                          No recent projects found.
+                        </div>
+                      )}
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Portal>
+                </DropdownMenu.Root>
+
+                {/* <button
+                  onClick={() => refetchProject()}
+                  className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-gray-400 hover:text-white"
+                  title="Refresh Data"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button> */}
               </div>
             </div>
+
+            {/* Tab Navigation */}
+            <div className="bg-obsidian/50 p-1 rounded-2xl border border-white/5 backdrop-blur-md">
+              <LayoutGroup>
+                <div className="flex items-center gap-1">
+                  <TabButton
+                    active={activeTab === "overview"}
+                    onClick={() => setActiveTab("overview")}
+                    icon={BarChart3}
+                  >
+                    Overview
+                  </TabButton>
+                  <TabButton
+                    active={activeTab === "board"}
+                    onClick={() => setActiveTab("board")}
+                    icon={LayoutGrid}
+                  >
+                    Strategy Board
+                  </TabButton>
+                  <TabButton
+                    active={activeTab === "evolution"}
+                    onClick={() => setActiveTab("evolution")}
+                    icon={Network}
+                  >
+                    Evolution
+                  </TabButton>
+                </div>
+              </LayoutGroup>
+            </div>
           </div>
+        </div>
+      </motion.div>
 
-          {/* Pipeline Board */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-400px)] min-h-[500px]">
-            {/* Column 1: Discovery */}
-            <DropColumn
-              id="discovery"
-              title="Discovery"
-              icon={Layers}
-              count={columns.discovery.length}
-              isOver={
-                activeId ? findContainer(activeId) !== "discovery" : false
-              }
-            >
-              <SortableContext
-                items={columns.discovery.map((i) => i.id)}
-                strategy={verticalListSortingStrategy}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* OVERVIEW TAB */}
+          {activeTab === "overview" && (
+            <div className="space-y-8">
+              {/* Hero Section: Cheapest Entry Point */}
+              <Card className="p-8 relative group overflow-hidden border-accent/30">
+                <div className="absolute inset-0 bg-linear-to-r from-accent/10 via-transparent to-transparent opacity-50" />
+                <div className="absolute right-0 top-0 w-64 h-64 bg-accent/20 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
+
+                <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div className="space-y-4 max-w-2xl">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-accent/20 border border-accent/30 text-accent">
+                        <Target className="w-6 h-6" />
+                      </div>
+                      <h2 className="text-lg font-bold text-accent tracking-wide uppercase">
+                        Cheapest Entry Point
+                      </h2>
+                    </div>
+                    <h3
+                      className="text-4xl md:text-5xl font-black text-white leading-tight line-clamp-3"
+                      title={projectData?.cheapest_entry_point || "N/A"}
+                    >
+                      {projectData?.cheapest_entry_point || "N/A"}
+                    </h3>
+                    <p className="text-gray-400 text-lg">
+                      This is your Minimum Viable Segment. Focus your initial
+                      validation efforts here to minimize cost and maximize
+                      learning.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 min-w-[200px]">
+                    <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                      <span className="text-xs text-gray-500 uppercase font-bold">
+                        Estimated Cost
+                      </span>
+                      <div className="text-xl font-mono text-white">
+                        $0 - $500
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                      <span className="text-xs text-gray-500 uppercase font-bold">
+                        Time to Validate
+                      </span>
+                      <div className="text-xl font-mono text-white">
+                        1-2 Weeks
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Diagnosis Action */}
+              <Card
+                className="p-10 relative overflow-hidden border-accent/30"
+                delay={0.3}
               >
-                {columns.discovery.map((strategy, index) => (
-                  <StrategyCard
-                    key={strategy.id}
-                    strategy={strategy}
-                    index={index}
-                    onEdit={(s) => {
-                      setEditingStrategy(s);
-                      setIsModalOpen(true);
-                    }}
-                    onDelete={handleDeleteStrategy}
-                    onComplete={handleCompleteStrategy}
-                  />
-                ))}
-              </SortableContext>
-            </DropColumn>
+                <div className="absolute inset-0 bg-linear-to-r from-accent/10 via-transparent to-transparent opacity-50" />
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                  <div className="flex items-start gap-6">
+                    <div className="p-5 rounded-2xl bg-accent/10 text-accent border border-accent/20 shadow-[0_0_30px_-10px_rgba(0,255,0,0.3)]">
+                      <Stethoscope className="w-10 h-10" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-3xl font-bold text-white">
+                        AI Diagnosis
+                      </h3>
+                      <p className="text-gray-400 text-lg max-w-xl">
+                        Identify weak links in your strategy and generate new
+                        discovery options using our advanced AI model.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowDiagnosisForm(true)}
+                    className="btn-primary px-10 py-5 flex items-center gap-3 rounded-xl font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-accent/20"
+                  >
+                    <Stethoscope className="w-6 h-6" />
+                    Diagnosis
+                  </button>
+                </div>
+              </Card>
 
-            {/* Column 2: Validation (Fix vs Pivot) */}
-            <DropColumn
-              id="validation"
-              title="Validation"
-              icon={GitBranch}
-              count={columns.validation.length}
-              isOver={
-                activeId ? findContainer(activeId) !== "validation" : false
-              }
-            >
-              <SortableContext
-                items={columns.validation.map((i) => i.id)}
-                strategy={verticalListSortingStrategy}
+              {/* Pipeline Summary Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[
+                  {
+                    label: "Discovery",
+                    count: columns.discovery.length,
+                    icon: Layers,
+                    color: "text-blue-400",
+                    bg: "bg-blue-500/10",
+                    border: "border-blue-500/20",
+                  },
+                  {
+                    label: "Validation",
+                    count: columns.validation.length,
+                    icon: GitBranch,
+                    color: "text-yellow-400",
+                    bg: "bg-yellow-500/10",
+                    border: "border-yellow-500/20",
+                  },
+                  {
+                    label: "Growth",
+                    count: columns.growth.length,
+                    icon: TrendingUp,
+                    color: "text-green-400",
+                    bg: "bg-green-500/10",
+                    border: "border-green-500/20",
+                  },
+                  {
+                    label: "Success",
+                    count: columns.success.length,
+                    icon: CheckCircle2,
+                    color: "text-purple-400",
+                    bg: "bg-purple-500/10",
+                    border: "border-purple-500/20",
+                  },
+                ].map((stat, i) => (
+                  <Card
+                    key={i}
+                    className="p-6 flex items-center gap-5 hover:bg-white/5 transition-colors"
+                    delay={0.4 + i * 0.1}
+                  >
+                    <div
+                      className={`p-3 rounded-xl ${stat.bg} ${stat.border} border ${stat.color}`}
+                    >
+                      <stat.icon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-black text-white">
+                        {stat.count}
+                      </div>
+                      <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-1">
+                        {stat.label}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* STRATEGY BOARD TAB */}
+          {activeTab === "board" && (
+            <div className="h-[calc(100vh-280px)] min-h-[600px] pb-8">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
               >
-                {columns.validation.map((strategy, index) => (
-                  <StrategyCard
-                    key={strategy.id}
-                    strategy={strategy}
-                    index={index}
-                    onEdit={(s) => {
-                      setEditingStrategy(s);
-                      setIsModalOpen(true);
-                    }}
-                    onDelete={handleDeleteStrategy}
-                    onComplete={handleCompleteStrategy}
-                  />
-                ))}
-              </SortableContext>
-            </DropColumn>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 h-full">
+                  {/* Column 1: Discovery */}
+                  <DropColumn
+                    id="discovery"
+                    title="Discovery"
+                    icon={Layers}
+                    count={columns.discovery.length}
+                    isOver={
+                      activeId ? findContainer(activeId) !== "discovery" : false
+                    }
+                  >
+                    <SortableContext
+                      items={columns.discovery.map((i) => i.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {columns.discovery.map((strategy, index) => (
+                        <StrategyCard
+                          key={strategy.id}
+                          strategy={strategy}
+                          index={index}
+                          onEdit={(s) => {
+                            setEditingStrategy(s);
+                            setIsModalOpen(true);
+                          }}
+                          onDelete={handleDeleteStrategy}
+                          onComplete={handleCompleteStrategy}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DropColumn>
 
-            {/* Column 3: Growth (Scaling) */}
-            <DropColumn
-              id="growth"
-              title="Growth"
-              icon={TrendingUp}
-              count={columns.growth.length}
-              isOver={activeId ? findContainer(activeId) !== "growth" : false}
-            >
-              <SortableContext
-                items={columns.growth.map((i) => i.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {columns.growth.map((strategy, index) => (
-                  <StrategyCard
-                    key={strategy.id}
-                    strategy={strategy}
-                    index={index}
-                    onEdit={(s) => {
-                      setEditingStrategy(s);
-                      setIsModalOpen(true);
-                    }}
-                    onDelete={handleDeleteStrategy}
-                    onComplete={handleCompleteStrategy}
-                  />
-                ))}
-              </SortableContext>
-            </DropColumn>
+                  {/* Column 2: Validation (Fix vs Pivot) */}
+                  <DropColumn
+                    id="validation"
+                    title="Validation"
+                    icon={GitBranch}
+                    count={columns.validation.length}
+                    isOver={
+                      activeId
+                        ? findContainer(activeId) !== "validation"
+                        : false
+                    }
+                  >
+                    <SortableContext
+                      items={columns.validation.map((i) => i.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {columns.validation.map((strategy, index) => (
+                        <StrategyCard
+                          key={strategy.id}
+                          strategy={strategy}
+                          index={index}
+                          onEdit={(s) => {
+                            setEditingStrategy(s);
+                            setIsModalOpen(true);
+                          }}
+                          onDelete={handleDeleteStrategy}
+                          onComplete={handleCompleteStrategy}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DropColumn>
 
-            {/* Column 4: Success */}
-            <DropColumn
-              id="success"
-              title="Success"
-              icon={CheckCircle2}
-              count={columns.success.length}
-              isOver={activeId ? findContainer(activeId) !== "success" : false}
-            >
-              <SortableContext
-                items={columns.success.map((i) => i.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                {columns.success.map((strategy, index) => (
-                  <StrategyCard
-                    key={strategy.id}
-                    strategy={strategy}
-                    index={index}
-                    onEdit={(s) => {
-                      setEditingStrategy(s);
-                      setIsModalOpen(true);
-                    }}
-                    onDelete={handleDeleteStrategy}
-                    onComplete={handleCompleteStrategy}
-                  />
-                ))}
-              </SortableContext>
-            </DropColumn>
-          </div>
+                  {/* Column 3: Growth (Scaling) */}
+                  <DropColumn
+                    id="growth"
+                    title="Growth"
+                    icon={TrendingUp}
+                    count={columns.growth.length}
+                    isOver={
+                      activeId ? findContainer(activeId) !== "growth" : false
+                    }
+                  >
+                    <SortableContext
+                      items={columns.growth.map((i) => i.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {columns.growth.map((strategy, index) => (
+                        <StrategyCard
+                          key={strategy.id}
+                          strategy={strategy}
+                          index={index}
+                          onEdit={(s) => {
+                            setEditingStrategy(s);
+                            setIsModalOpen(true);
+                          }}
+                          onDelete={handleDeleteStrategy}
+                          onComplete={handleCompleteStrategy}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DropColumn>
 
-          <DragOverlay dropAnimation={dropAnimation}>
-            {activeId ? (
-              <StrategyCard
-                strategy={[
-                  ...columns.discovery,
-                  ...columns.validation,
-                  ...columns.growth,
-                  ...columns.success,
-                ].find((i) => i.id === activeId)}
-                isOverlay
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      )}
+                  {/* Column 4: Success */}
+                  <DropColumn
+                    id="success"
+                    title="Success"
+                    icon={CheckCircle2}
+                    count={columns.success.length}
+                    isOver={
+                      activeId ? findContainer(activeId) !== "success" : false
+                    }
+                  >
+                    <SortableContext
+                      items={columns.success.map((i) => i.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {columns.success.map((strategy, index) => (
+                        <StrategyCard
+                          key={strategy.id}
+                          strategy={strategy}
+                          index={index}
+                          onEdit={(s) => {
+                            setEditingStrategy(s);
+                            setIsModalOpen(true);
+                          }}
+                          onDelete={handleDeleteStrategy}
+                          onComplete={handleCompleteStrategy}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DropColumn>
+                </div>
+
+                <DragOverlay dropAnimation={dropAnimation}>
+                  {activeId ? (
+                    <StrategyCard
+                      strategy={[
+                        ...columns.discovery,
+                        ...columns.validation,
+                        ...columns.growth,
+                        ...columns.success,
+                      ].find((i) => i.id === activeId)}
+                      isOverlay
+                    />
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
+            </div>
+          )}
+
+          {/* EVOLUTION TAB */}
+          {activeTab === "evolution" && (
+            <Card className="p-6 h-[calc(100vh-300px)] min-h-[600px]">
+              <EvolutionMap projectData={projectData} />
+            </Card>
+          )}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Strategy Detail View Modal */}
       <StrategyDetailView
