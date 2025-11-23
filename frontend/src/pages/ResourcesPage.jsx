@@ -104,7 +104,7 @@ export default function ResourcesPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-primary text-white shadow-md"
+                  ? "bg-accent text-black shadow-md"
                   : "text-text-muted hover:text-text hover:bg-bg-secondary"
               }`}
             >
