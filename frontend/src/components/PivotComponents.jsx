@@ -1,7 +1,4 @@
 import React, { useState } from "react";
-import { useSortable } from "@dnd-kit/sortable";
-import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
 import { motion, AnimatePresence } from "motion/react";
 import {
   MoreVertical,
@@ -10,78 +7,63 @@ import {
   CheckCircle2,
   Plus,
   X,
-  GripVertical,
   Target,
   Zap,
-  AlertTriangle,
   TrendingUp,
   BarChart3,
   ListChecks,
   FileText,
   GitBranch,
-  ShieldAlert,
+  ArrowRight,
+  PlayCircle,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Tabs from "@radix-ui/react-tabs";
 
-// --- Draggable Strategy Card ---
-export const StrategyCard = ({
+// --- Strategy List Item (New Design) ---
+export const StrategyListItem = ({
   strategy,
-  index,
   onEdit,
   onDelete,
-  onComplete,
-  isOverlay = false,
+  onStatusChange,
+  onAnalyze,
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: strategy.id,
-    data: {
-      type: "STRATEGY",
-      strategy,
-    },
-  });
+  const isFix = strategy.type === "fix";
+  const isPivot = strategy.type === "pivot";
+  const isPotential = !strategy.status || strategy.status === "potential";
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "discovery":
+        return "text-blue-400 bg-blue-400/10 border-blue-400/20";
+      case "validation":
+        return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
+      case "growth":
+        return "text-green-400 bg-green-400/10 border-green-400/20";
+      case "success":
+        return "text-purple-400 bg-purple-400/10 border-purple-400/20";
+      default:
+        return "text-gray-400 bg-gray-400/10 border-gray-400/20";
+    }
   };
 
-  const isFix = strategy.type === "fix";
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`group relative p-4 rounded-xl border backdrop-blur-md transition-all duration-200 ${
-        isOverlay
-          ? "bg-accent/10 border-accent shadow-2xl scale-105 cursor-grabbing z-50"
-          : "bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10"
-      } ${strategy.completed ? "opacity-60 grayscale" : ""}`}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="group relative p-5 rounded-xl border border-white/5 bg-obsidian hover:border-white/10 transition-all duration-300"
     >
-      {/* Drag Handle & Header */}
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div
-          {...attributes}
-          {...listeners}
-          className="mt-1 cursor-grab active:cursor-grabbing text-gray-500 hover:text-white transition-colors"
-        >
-          <GripVertical className="w-4 h-4" />
-        </div>
-
+      <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-2">
             {strategy.type && (
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1 ${
+                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1 ${
                   isFix
                     ? "bg-green-500/10 border-green-500/20 text-green-400"
                     : "bg-accent/10 border-accent/20 text-accent"
@@ -95,138 +77,114 @@ export const StrategyCard = ({
                 {isFix ? "Fix" : "Pivot"}
               </span>
             )}
+            {!isPotential && (
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(
+                  strategy.status
+                )}`}
+              >
+                {strategy.status}
+              </span>
+            )}
           </div>
-          <h4 className="font-bold text-white text-sm leading-tight line-clamp-2">
+          <h3 className="text-lg font-bold text-white mb-2 line-clamp-1 group-hover:text-accent transition-colors">
             {strategy.title}
-          </h4>
+          </h3>
+          <p className="text-sm text-gray-400 line-clamp-2 mb-4 leading-relaxed">
+            {strategy.description}
+          </p>
+
+          <div className="flex items-center gap-4 text-xs text-gray-500">
+            {strategy.analysis?.viability_score && (
+              <div className="flex items-center gap-1">
+                <Target className="w-3.5 h-3.5" />
+                <span className="font-mono text-white">
+                  {strategy.analysis.viability_score}% Viability
+                </span>
+              </div>
+            )}
+            {strategy.analysis?.estimated_timeline && (
+              <div className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{strategy.analysis.estimated_timeline}</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Actions Menu */}
-        {!isOverlay && (
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <button className="p-1 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
-                <MoreVertical className="w-4 h-4" />
-              </button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                className="min-w-[140px] bg-black/90 border border-white/10 rounded-lg p-1 shadow-xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-100"
-                sideOffset={5}
+        {/* Actions */}
+        <div className="flex flex-col gap-2">
+          {isPotential ? (
+            <button
+              onClick={() => onAnalyze(strategy)}
+              className="px-4 py-2 rounded-lg bg-accent text-black font-bold text-sm hover:bg-accent/90 transition-colors flex items-center gap-2 shadow-lg shadow-accent/10"
+            >
+              <PlayCircle className="w-4 h-4" />
+              Analyze
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onEdit(strategy)}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                title="View Details"
               >
-                <DropdownMenu.Item
-                  onClick={() => onEdit(strategy)}
-                  className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded cursor-pointer outline-none"
-                >
-                  <Edit2 className="w-3.5 h-3.5" /> Details
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  onClick={() => onComplete(strategy.id)}
-                  className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-white/10 rounded cursor-pointer outline-none"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />{" "}
-                  {strategy.completed ? "Mark Active" : "Complete"}
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator className="h-px bg-white/10 my-1" />
-                <DropdownMenu.Item
-                  onClick={() => onDelete(strategy.id)}
-                  className="flex items-center gap-2 px-2 py-1.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded cursor-pointer outline-none"
-                >
-                  <Trash2 className="w-3.5 h-3.5" /> Delete
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
-        )}
-      </div>
+                <Edit2 className="w-4 h-4" />
+              </button>
 
-      {/* Description */}
-      <p className="text-xs text-gray-400 leading-relaxed line-clamp-3 mb-3">
-        {strategy.description}
-      </p>
-
-      {/* Metrics / Footer */}
-      <div className="flex items-center justify-between pt-2 border-t border-white/5">
-        <div className="flex items-center gap-2">
-          {strategy.growthRate && (
-            <span className="flex items-center gap-1 text-[10px] font-bold text-green-400 bg-green-400/10 px-1.5 py-0.5 rounded">
-              <TrendingUp className="w-3 h-3" />
-              {strategy.growthRate}
-            </span>
-          )}
-          {strategy.confidence && (
-            <div className="flex items-center gap-1 text-[10px] text-gray-500">
-              <Target className="w-3 h-3" />
-              {strategy.confidence}%
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content
+                    className="min-w-[160px] bg-[#0A0A0A] border border-white/10 rounded-xl p-1 shadow-xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-100"
+                    sideOffset={5}
+                    align="end"
+                  >
+                    <div className="px-2 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Move To
+                    </div>
+                    {["discovery", "validation", "growth", "success"].map(
+                      (s) => (
+                        <DropdownMenu.Item
+                          key={s}
+                          onClick={() => onStatusChange(strategy.id, s)}
+                          disabled={strategy.status === s}
+                          className={`flex items-center gap-2 px-2 py-2 text-sm rounded-lg cursor-pointer outline-none transition-colors ${
+                            strategy.status === s
+                              ? "opacity-50 cursor-default"
+                              : "text-gray-300 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              getStatusColor(s)
+                                .replace("text-", "bg-")
+                                .split(" ")[0]
+                            }`}
+                          />
+                          <span className="capitalize">{s}</span>
+                        </DropdownMenu.Item>
+                      )
+                    )}
+                    <DropdownMenu.Separator className="h-px bg-white/10 my-1" />
+                    <DropdownMenu.Item
+                      onClick={() => onDelete(strategy.id)}
+                      className="flex items-center gap-2 px-2 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg cursor-pointer outline-none"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
+                    </DropdownMenu.Item>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
             </div>
           )}
         </div>
-
-        {strategy.completed && (
-          <span className="flex items-center gap-1 text-[10px] text-green-400 font-bold">
-            <CheckCircle2 className="w-3 h-3" /> Done
-          </span>
-        )}
       </div>
-    </div>
-  );
-};
-
-// --- Droppable Column ---
-export const DropColumn = ({
-  id,
-  title,
-  icon: Icon,
-  count,
-  children,
-  isOver,
-}) => {
-  const { setNodeRef } = useDroppable({
-    id,
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      className={`flex flex-col h-full rounded-2xl border transition-colors duration-300 ${
-        isOver
-          ? "bg-white/5 border-accent/50 shadow-[0_0_30px_rgba(200,255,22,0.1)]"
-          : "bg-black/20 border-white/5"
-      }`}
-    >
-      {/* Column Header */}
-      <div className="p-4 border-b border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div
-            className={`p-1.5 rounded-lg ${
-              isOver ? "bg-accent text-black" : "bg-white/5 text-gray-400"
-            }`}
-          >
-            <Icon className="w-4 h-4" />
-          </div>
-          <h3
-            className={`font-bold text-sm ${
-              isOver ? "text-white" : "text-gray-300"
-            }`}
-          >
-            {title}
-          </h3>
-        </div>
-        <span className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] font-mono text-gray-500">
-          {count}
-        </span>
-      </div>
-
-      {/* Column Content */}
-      <div className="flex-1 p-3 space-y-3 overflow-y-auto custom-scrollbar min-h-[200px]">
-        {children}
-        {children.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-gray-600 border-2 border-dashed border-white/5 rounded-xl p-4">
-            <p className="text-xs text-center">Drop items here</p>
-          </div>
-        )}
-      </div>
-    </div>
+    </motion.div>
   );
 };
 

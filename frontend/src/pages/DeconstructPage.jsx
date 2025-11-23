@@ -41,6 +41,8 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { ChevronDown, FolderOpen, CheckCircle2 } from "lucide-react";
 
 // --- Utility Components ---
 
@@ -59,7 +61,11 @@ const TabButton = ({ active, onClick, children, icon: Icon }) => (
       />
     )}
     <span className="relative z-10 flex items-center gap-2">
-      {Icon && <Icon className={`w-4 h-4 lg:block hidden ${active ? "text-accent" : ""}`} />}
+      {Icon && (
+        <Icon
+          className={`w-4 h-4 lg:block hidden ${active ? "text-accent" : ""}`}
+        />
+      )}
       {children}
     </span>
   </button>
@@ -102,6 +108,17 @@ export default function DeconstructPage() {
       return api.getProject(selectedProjectId, token);
     },
     enabled: !!user && !!selectedProjectId,
+  });
+
+  // Fetch recent projects for selector
+  const { data: recentProjects = [] } = useQuery({
+    queryKey: ["recentProjects"],
+    queryFn: async () => {
+      const token = await user.getIdToken();
+      const response = await api.getRecentProjects(token);
+      return response.projects || [];
+    },
+    enabled: !!user,
   });
 
   // Populate state when project data is loaded
@@ -278,14 +295,59 @@ export default function DeconstructPage() {
                     ID: {results.project_id?.slice(0, 8) || "NEW_SESSION"}
                   </span>
                 </motion.div>
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, type: "spring" }}
-                  className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 truncate"
-                >
-                  {results.name || "Untitled Project"}
-                </motion.h1>
+                <div className="flex items-center gap-4">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, type: "spring" }}
+                    className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 truncate"
+                  >
+                    {results.name || "Untitled Project"}
+                  </motion.h1>
+                  {/* Project Selector */}
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-gray-400 hover:text-white">
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content
+                        className="min-w-[200px] bg-[#0A0A0A] border border-white/10 rounded-xl p-1 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in zoom-in-95 duration-100"
+                        align="start"
+                        sideOffset={5}
+                      >
+                        <div className="px-2 py-1.5 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Switch Project
+                        </div>
+                        {recentProjects?.map((p) => (
+                          <DropdownMenu.Item
+                            key={p.id}
+                            onClick={() => setSelectedProjectId(p.id)}
+                            className={`flex items-center gap-2 px-2 py-2 text-sm rounded-lg cursor-pointer outline-none transition-colors ${
+                              selectedProjectId === p.id
+                                ? "bg-accent/10 text-accent"
+                                : "text-gray-300 hover:text-white hover:bg-white/10"
+                            }`}
+                          >
+                            <FolderOpen className="w-3.5 h-3.5" />
+                            <span className="truncate max-w-[180px]">
+                              {p.name}
+                            </span>
+                            {selectedProjectId === p.id && (
+                              <CheckCircle2 className="w-3.5 h-3.5 ml-auto" />
+                            )}
+                          </DropdownMenu.Item>
+                        ))}
+                        {(!recentProjects || recentProjects.length === 0) && (
+                          <div className="px-2 py-2 text-xs text-gray-500 italic">
+                            No recent projects found.
+                          </div>
+                        )}
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
+                </div>
               </div>
 
               {/* Tab Navigation */}
