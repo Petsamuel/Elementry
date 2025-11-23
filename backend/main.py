@@ -71,20 +71,6 @@ async def deconstruct(request: DeconstructionRequest, token_data: dict = Depends
     # Check limits
     if not check_ai_limit(token_data['uid']):
         raise HTTPException(status_code=403, detail="AI generation limit reached for your plan. Upgrade to Pro for more.")
-
-    result = await deconstruct_business_idea(request.idea)
-    
-    # Save as project
-    from firestore_utils import create_project
-    
-    # Convert Pydantic model to dict
-    project_data = result.dict()
-    project_data['name'] = request.idea # Use idea as name for now
-    
-    project_id = create_project(token_data['uid'], project_data)
-    
-    # Add project_id to result
-    result.project_id = project_id
     
     # Increment usage
     increment_ai_usage(token_data['uid'])

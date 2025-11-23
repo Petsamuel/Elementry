@@ -201,7 +201,7 @@ export default function DashboardOverview() {
 
           {projects.length > 0 ? (
             <div className="space-y-3">
-              {projects.map((project, index) => (
+              {projects.slice(0, 2).map((project, index) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, x: -20 }}

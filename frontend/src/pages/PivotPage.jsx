@@ -434,12 +434,12 @@ export default function PivotPage() {
           <div className="mb-8">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md">
               <div className="absolute inset-0 bg-linear-to-r from-accent/5 via-transparent to-transparent opacity-50" />
-              <div className="relative p-6 flex items-center justify-between">
+              <div className="relative p-6 flex lg:items-center justify-between lg:flex-row flex-col gap-y-5">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-xl bg-accent/10 text-accent">
                     <Stethoscope className="w-6 h-6" />
                   </div>
-                  <div>
+                  <div className="">
                     <h3 className="text-lg font-bold text-white">
                       AI Diagnosis
                     </h3>
@@ -450,7 +450,7 @@ export default function PivotPage() {
                 </div>
                 <button
                   onClick={() => setShowDiagnosisForm(true)}
-                  className="btn-primary px-6 py-2 flex items-center gap-2"
+                  className="btn-primary px-6 py-2 flex items-center gap-2 justify-center"
                 >
                   <Stethoscope className="w-4 h-4" />
                   Run Diagnosis

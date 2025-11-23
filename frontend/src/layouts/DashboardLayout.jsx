@@ -58,13 +58,13 @@ const SidebarContent = ({
             onClick={() => setCurrentPage(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
               isActive
-                ? "bg-primary/10 text-primary"
+                ? "bg-accent/10 text-accent"
                 : "text-text-muted hover:text-text hover:bg-accent/10"
             }`}
           >
             <item.icon
               className={`w-5 h-5 transition-colors ${
-                isActive ? "text-primary" : "group-hover:text-primary"
+                isActive ? "text-accent" : "group-hover:text-accent"
               }`}
             />
             {expanded && <span className="font-medium">{item.name}</span>}
