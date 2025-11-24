@@ -300,7 +300,7 @@ export default function DeconstructPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1, type: "spring" }}
-                    className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 truncate"
+                    className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 w-sm truncate"
                   >
                     {results.name || "Untitled Project"}
                   </motion.h1>

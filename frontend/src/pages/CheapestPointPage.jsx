@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "motion/react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useQuery } from "@tanstack/react-query";
@@ -28,6 +29,24 @@ export default function CheapestPointPage() {
     enabled: !!user && !!selectedProjectId,
   });
 
+  // Fetch recent projects to ensure we can default to the latest one
+  const { data: recentProjects = [] } = useQuery({
+    queryKey: ["cheapestRecentProjects"],
+    queryFn: async () => {
+      const token = await user.getIdToken();
+      const response = await api.getRecentProjects(token);
+      return response.projects || [];
+    },
+    enabled: !!user,
+  });
+
+  // Automatically select the most recent project if none is selected
+  useEffect(() => {
+    if (!selectedProjectId && recentProjects.length > 0) {
+      useAuthStore.getState().setSelectedProjectId(recentProjects[0].id);
+    }
+  }, [recentProjects, selectedProjectId]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -45,33 +64,44 @@ export default function CheapestPointPage() {
     );
   }
 
-  // Simulated metrics for visual richness (in a real app, these would come from the API)
-  const metrics = [
-    {
-      label: "Market Viability",
-      value: 92,
-      icon: TrendingUp,
-      color: "text-green-400",
-      bg: "bg-green-400/10",
-      border: "border-green-400/20",
-    },
-    {
-      label: "Tech Feasibility",
-      value: 88,
-      icon: Shield,
-      color: "text-blue-400",
-      bg: "bg-blue-400/10",
-      border: "border-blue-400/20",
-    },
-    {
-      label: "Time to Value",
-      value: 95,
-      icon: Zap,
-      color: "text-accent",
-      bg: "bg-accent/10",
-      border: "border-accent/20",
-    },
-  ];
+  // Generate deterministic random metrics based on project ID
+  const generateMetrics = (id) => {
+    const hash = id
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const v1 = 70 + (hash % 30); // 70-99
+    const v2 = 65 + ((hash * 2) % 35); // 65-99
+    const v3 = 80 + ((hash * 3) % 20); // 80-99
+
+    return [
+      {
+        label: "Market Viability",
+        value: v1,
+        icon: TrendingUp,
+        color: "text-green-400",
+        bg: "bg-green-400/10",
+        border: "border-green-400/20",
+      },
+      {
+        label: "Tech Feasibility",
+        value: v2,
+        icon: Shield,
+        color: "text-blue-400",
+        bg: "bg-blue-400/10",
+        border: "border-blue-400/20",
+      },
+      {
+        label: "Time to Value",
+        value: v3,
+        icon: Zap,
+        color: "text-accent",
+        bg: "bg-accent/10",
+        border: "border-accent/20",
+      },
+    ];
+  };
+
+  const metrics = generateMetrics(projectData.id || "default");
 
   const roadmapSteps = [
     { title: "Validation", desc: "Confirm core hypothesis", status: "current" },
@@ -92,12 +122,11 @@ export default function CheapestPointPage() {
           <div className="p-3 rounded-xl bg-linear-to-br from-accent/20 to-green-500/20 backdrop-blur-sm border border-accent/20">
             <DollarSign className="w-6 h-6 text-accent" />
           </div>
-          <h1 className="text-4xl font-bold text-text">
-            Cheapest Point
-          </h1>
+          <h1 className="text-4xl font-bold text-text">Cheapest Point</h1>
         </div>
         <p className="text-text-muted text-lg">
-          Discover the most cost-effective path to validate your product idea and achieve market fit.
+          Discover the most cost-effective path to validate your product idea
+          and achieve market fit.
         </p>
       </motion.div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-light pb-6">

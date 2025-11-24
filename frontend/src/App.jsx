@@ -17,6 +17,7 @@ import PivotPage from "./pages/PivotPage";
 import CheapestPointPage from "./pages/CheapestPointPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import SavedProjectsPage from "./pages/SavedProjectsPage";
+import SettingsPage from "./pages/SettingsPage";
 import Home from "./pages/Home";
 import FeaturesPage from "./pages/FeaturesPage";
 import PricingPage from "./pages/PricingPage";
@@ -135,9 +136,7 @@ function AppContent() {
             {currentPage === "cheapest" && <CheapestPointPage />}
             {currentPage === "resources" && <ResourcesPage />}
             {currentPage === "saved" && <SavedProjectsPage />}
-            {/* Legacy route - can be removed later */}
-            {currentPage === "old-dashboard" && <Dashboard />}
-            {/* Add other authenticated routes here */}
+            {currentPage === "settings" && <SettingsPage />}
           </DashboardLayout>
         ) : (
           <PublicLayout onLogin={handleLogin} onNavigate={setCurrentPage}>

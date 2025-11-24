@@ -81,7 +81,7 @@ export default function ResourcesPage() {
   return (
     <div className="space-y-8 relative pb-20">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-light pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-primary font-medium tracking-wider uppercase">
             <Activity className="w-4 h-4" />
@@ -97,7 +97,7 @@ export default function ResourcesPage() {
       {/* Controls Section */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         {/* Tabs */}
-        <div className="flex items-center gap-1 p-1 bg-card-bg border border-border-light rounded-xl overflow-x-auto no-scrollbar max-w-full">
+        <div className="flex items-center gap-1 p-1 bg-card-bg border border-white/10 rounded-xl overflow-x-auto no-scrollbar max-w-full">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -123,10 +123,10 @@ export default function ResourcesPage() {
               placeholder="Search resources..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-card-bg border border-border-light rounded-xl focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all text-sm"
+              className="w-full pl-10 pr-4 py-2 bg-card-bg border border-white/10 rounded-xl focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-primary/50 transition-all text-sm"
             />
           </div>
-          <div className="flex items-center gap-1 p-1 bg-card-bg border border-border-light rounded-xl">
+          <div className="flex items-center gap-1 p-1 bg-card-bg border border-white/10 rounded-xl">
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-lg transition-colors ${
@@ -170,12 +170,12 @@ export default function ResourcesPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2, delay: index * 0.05 }}
-                className={`group relative bg-card-bg border border-border-light rounded-2xl overflow-hidden hover:border-primary/30 transition-all hover:shadow-xl hover:shadow-primary/5 ${
+                className={`group relative bg-card-bg border border-white/10 rounded-2xl overflow-hidden hover:border-accent/30 transition-all hover:shadow-xl hover:shadow-accent/5 ${
                   viewMode === "list" ? "flex items-center p-4 gap-6" : "p-6"
                 }`}
               >
                 {/* Hover Gradient */}
-                <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                 <div
                   className={`relative z-10 ${
@@ -188,7 +188,7 @@ export default function ResourcesPage() {
                     <Box className="w-6 h-6 text-accent" />
                   </div>
                   {viewMode === "grid" && (
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-border-light text-text-muted uppercase tracking-wider border border-white/5">
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/10 text-text-muted uppercase tracking-wider border border-white/5">
                       {resource.category || "General"}
                     </span>
                   )}
@@ -202,7 +202,7 @@ export default function ResourcesPage() {
                   }`}
                 >
                   <div className={viewMode === "list" ? "col-span-4" : ""}>
-                    <h3 className="text-lg font-bold text-text group-hover:text-primary transition-colors flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-text group-hover:text-accent transition-colors flex items-center gap-2">
                       {resource.name}
                       {viewMode === "grid" && (
                         <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-text-muted" />
@@ -228,7 +228,7 @@ export default function ResourcesPage() {
                       className={
                         viewMode === "list"
                           ? "col-span-3 flex justify-end"
-                          : "pt-4 border-t border-border-light flex items-center justify-between text-sm"
+                          : "pt-4 border-t border-white/10 flex items-center justify-between text-sm"
                       }
                     >
                       {viewMode === "grid" && (
@@ -245,8 +245,8 @@ export default function ResourcesPage() {
                             key={i}
                             className={`w-1.5 h-4 rounded-full transition-colors ${
                               i < resource.complexity
-                                ? "bg-primary shadow-[0_0_5px_var(--color-primary)]"
-                                : "bg-border-light"
+                                ? "bg-primary shadow-[0_0_5px_var(--color-accent)]"
+                                : "bg-white/10"
                             }`}
                           />
                         ))}
@@ -262,7 +262,7 @@ export default function ResourcesPage() {
               animate={{ opacity: 1 }}
               className="col-span-full flex flex-col items-center justify-center py-20 text-text-muted"
             >
-              <div className="w-20 h-20 bg-card-bg rounded-full flex items-center justify-center mb-4 border border-border-light">
+              <div className="w-20 h-20 bg-card-bg rounded-full flex items-center justify-center mb-4 border border-white/10">
                 <Search className="w-10 h-10 opacity-20" />
               </div>
               <p className="text-lg font-medium">
@@ -273,7 +273,7 @@ export default function ResourcesPage() {
                   setActiveTab("all");
                   setSearchQuery("");
                 }}
-                className="mt-4 text-primary hover:underline text-sm"
+                className="mt-4 text-accent hover:underline text-sm"
               >
                 Clear all filters
               </button>

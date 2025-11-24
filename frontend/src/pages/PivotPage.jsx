@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -116,6 +116,13 @@ export default function PivotPage() {
     },
     enabled: !!user,
   });
+
+  // Automatically select the most recent project if none is selected
+  useEffect(() => {
+    if (!selectedProjectId && recentProjects.length > 0) {
+      setSelectedProjectId(recentProjects[0].id);
+    }
+  }, [recentProjects, selectedProjectId, setSelectedProjectId]);
 
   // Combine potential and active strategies
   const strategies = [
@@ -292,7 +299,7 @@ export default function PivotPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, type: "spring" }}
-                  className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 truncate"
+                  className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase w-sm truncate"
                 >
                   {projectData?.name || "Pivot Engineering"}
                 </motion.h1>

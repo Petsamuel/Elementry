@@ -71,11 +71,24 @@ async def deconstruct(request: DeconstructionRequest, token_data: dict = Depends
     # Check limits
     if not check_ai_limit(token_data['uid']):
         raise HTTPException(status_code=403, detail="AI generation limit reached for your plan. Upgrade to Pro for more.")
+
+    result = await deconstruct_business_idea(request.idea)
+    
+    # Save as project
+    from firestore_utils import create_project
+    
+    # Convert Pydantic model to dict
+    project_data = result.dict()
+    project_data['name'] = request.idea # Use idea as name for now
+    
+    project_id = create_project(token_data['uid'], project_data)
+    
+    # Add project_id to result
+    result.project_id = project_id
     
     # Increment usage
     increment_ai_usage(token_data['uid'])
     
-    result = await deconstruct_business_idea(request.idea)
     return result
 
 @app.get("/dashboard/stats")
@@ -109,201 +122,6 @@ async def get_dashboard_projects(limit: int = 10, token_data: dict = Depends(get
 
 @app.delete("/dashboard/projects/{project_id}")
 async def delete_project_endpoint(project_id: str, token_data: dict = Depends(get_token)):
-    """Delete a project"""
-    from firestore_utils import delete_project
-    
-    success = delete_project(token_data['uid'], project_id)
-    
-    # Invalidate cache if exists
-    cache_key = (token_data['uid'], project_id)
-    if cache_key in project_cache:
-        del project_cache[cache_key]
-        
-    return {"success": success}
-
-@app.post("/dashboard/alerts/{alert_id}/dismiss")
-async def dismiss_alert_endpoint(alert_id: str, token_data: dict = Depends(get_token)):
-    """Dismiss an alert"""
-    from firestore_utils import dismiss_alert
-    
-    success = dismiss_alert(token_data['uid'], alert_id)
-    return {"success": success}
-
-@app.get("/dashboard/projects/{project_id}")
-async def get_project_endpoint(project_id: str, token_data: dict = Depends(get_token)):
-    """Get a single project with caching"""
-    uid = token_data['uid']
-    cache_key = (uid, project_id)
-    
-    # Check cache
-    if cache_key in project_cache:
-        data, timestamp = project_cache[cache_key]
-        if time.time() - timestamp < CACHE_TTL:
-            return data
-    
-    from firestore_utils import get_project
-    
-    project = get_project(uid, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-        
-    # Update cache
-    project_cache[cache_key] = (project, time.time())
-    
-    return project
-
-@app.patch("/dashboard/projects/{project_id}/status")
-async def update_project_status_endpoint(project_id: str, status_data: dict, token_data: dict = Depends(get_token)):
-    """Update project status"""
-    from firestore_utils import update_project_status
-    
-    status = status_data.get('status')
-    if not status:
-        raise HTTPException(status_code=400, detail="Status is required")
-        
-    success = update_project_status(token_data['uid'], project_id, status)
-    
-    # Invalidate cache
-    cache_key = (token_data['uid'], project_id)
-    if cache_key in project_cache:
-        del project_cache[cache_key]
-        
-    return {"success": success}
-
-@app.get("/dashboard/overview")
-async def get_dashboard_overview(token_data: dict = Depends(get_token)):
-    """Get all dashboard data in a single request"""
-    from firestore_utils import get_user_stats, get_user_usage_stats, get_user_alerts, get_user_projects, get_project_growth
-    
-    uid = token_data['uid']
-    
-    return {
-        "stats": get_user_stats(uid),
-        "usage": get_user_usage_stats(uid),
-        "alerts": get_user_alerts(uid, limit=5),
-        "projects": get_user_projects(uid, limit=5),
-        "growth": get_project_growth(uid)
-    }
-
-@app.post("/pivots", dependencies=[Depends(rate_limiter)])
-async def create_pivot_endpoint(request: PivotRequest, token_data: dict = Depends(get_token)):
-    """Create a new pivot opportunity with AI analysis"""
-    from firestore_utils import create_pivot, get_project
-    from engine import generate_pivot_analysis
-    
-    # 1. Get original project to get the idea/context
-    # Check cache first for project
-    uid = token_data['uid']
-    cache_key = (uid, request.project_id)
-    project = None
-    
-    if cache_key in project_cache:
-        data, timestamp = project_cache[cache_key]
-        if time.time() - timestamp < CACHE_TTL:
-            project = data
-            
-    if not project:
-        project = get_project(uid, request.project_id)
-        if project:
-            project_cache[cache_key] = (project, time.time())
-
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-        
-    original_idea = project.get('name', '')
-    
-    # 2. Generate analysis using Gemini
-    analysis_result = await generate_pivot_analysis(original_idea, request.pivot_name)
-    
-    # 3. Prepare data
-    pivot_data = request.dict()
-    pivot_data['analysis'] = analysis_result.dict()
-    
-    # Initialize progress tracking fields
-    pivot_data['analysis'].update({
-        'status': 'active',
-        'progress_percentage': 0,
-        'actions_completed': 0,
-        'actions_total': len(analysis_result.recommended_actions),
-        'current_week': 0,
-        'started_at': None
-    })
-    
-    # 4. Save to Firestore
-    pivot_id = create_pivot(token_data['uid'], pivot_data)
-    
-    return {"status": "success", "pivot_id": pivot_id}
-
-@app.get("/pivots")
-async def get_pivots_endpoint(project_id: str = None, token_data: dict = Depends(get_token)):
-    """Get pivots for the authenticated user"""
-    from firestore_utils import get_pivots
-    
-    pivots = get_pivots(token_data['uid'], project_id)
-    return {"pivots": pivots}
-
-@app.patch("/pivots/{pivot_id}/actions/{action_index}")
-async def update_pivot_action_endpoint(
-    pivot_id: str,
-    action_index: int,
-    request: dict,
-    token_data: dict = Depends(get_token)
-):
-    """Mark a specific action as complete/incomplete"""
-    from firestore_utils import update_pivot_action
-    
-    completed = request.get('completed', False)
-    updated_pivot = update_pivot_action(token_data['uid'], pivot_id, action_index, completed)
-    
-    if not updated_pivot:
-       raise HTTPException(status_code=404, detail="Pivot or action not found")
-    
-    return updated_pivot
-
-@app.patch("/pivots/{pivot_id}/status")
-async def update_pivot_status_endpoint(
-    pivot_id: str,
-    request: dict,
-    token_data: dict = Depends(get_token)
-):
-    """Update pivot simulation status"""
-    from firestore_utils import update_pivot_status
-    
-    new_status = request.get('status')
-    if not new_status:
-        raise HTTPException(status_code=400, detail="Status is required")
-    
-    success = update_pivot_status(token_data['uid'], pivot_id, new_status)
-    if not success:
-        raise HTTPException(status_code=400, detail="Invalid status or pivot not found")
-    
-    return {"success": success, "status": new_status}
-
-@app.post("/projects/{project_id}/diagnose", dependencies=[Depends(rate_limiter)])
-async def diagnose_project_endpoint(
-    project_id: str,
-    request: DiagnosisRequest,
-    token_data: dict = Depends(get_token)
-):
-    """Diagnose business challenges"""
-    from firestore_utils import update_project_diagnosis, get_project
-    from engine import generate_diagnosis
-    
-    uid = token_data['uid']
-    
-    # Get project context
-    project = get_project(uid, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-        
-    idea = project.get('name', '')
-    
-    # Generate diagnosis
-    diagnosis_result = await generate_diagnosis(idea, request.challenges)
-    
-    # Save to Firestore
-    success = update_project_diagnosis(uid, project_id, diagnosis_result.dict())
-    
     """Delete a project"""
     from firestore_utils import delete_project
     
