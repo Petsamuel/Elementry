@@ -80,3 +80,15 @@ class StrategyRequest(BaseModel):
 
 class StrategyUpdateRequest(BaseModel):
     status: StrategyStatus
+
+class SettingsUpdate(BaseModel):
+    currency: Optional[str] = None
+    theme: Optional[str] = None
+    notifications: Optional[bool] = None
+    pushNotifications: Optional[bool] = None
+    marketingEmails: Optional[bool] = None
+    dataRetention: Optional[str] = None
+    reducedMotion: Optional[bool] = None
+    compactMode: Optional[bool] = None
+    aiOptimization: Optional[bool] = None
+

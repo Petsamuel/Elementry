@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useAuthStore } from "../store/useAuthStore";
 import {
@@ -101,24 +101,32 @@ export default function SettingsPage() {
     setCurrency,
     settings,
     updateSettings,
+    saveSettings,
+    fetchSettings,
     user,
-    selectedProjectId,
   } = useAuthStore();
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    // Fetch settings on mount
+    fetchSettings();
+  }, [fetchSettings]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // If a project is selected, update its currency
-      if (selectedProjectId && user) {
-        const token = await user.getIdToken();
-        await api.updateProjectCurrency(selectedProjectId, currency, token);
+      const settingsToSave = {
+        currency,
+        ...settings,
+      };
+
+      const success = await saveSettings(settingsToSave);
+
+      if (success) {
+        toast.success("Settings saved successfully");
+      } else {
+        toast.error("Failed to save settings");
       }
-
-      // Simulate other settings save
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      toast.success("Settings saved successfully");
     } catch (error) {
       console.error("Failed to save settings:", error);
       toast.error("Failed to save settings");

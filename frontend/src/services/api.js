@@ -183,5 +183,23 @@ export const api = {
     );
     return response.data;
   },
+
+  getSettings: async (token) => {
+    const response = await axios.get(`${API_URL}/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  },
+
+  updateSettings: async (settings, token) => {
+    const response = await axios.patch(
+      `${API_URL}/settings`,
+      settings,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
 };
 

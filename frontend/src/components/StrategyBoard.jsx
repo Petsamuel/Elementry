@@ -93,6 +93,7 @@ export default function StrategyBoard({
   onDelete,
   onStatusChange,
   onAnalyze,
+  analyzingStrategyId,
 }) {
   const [activeTab, setActiveTab] = useState("all");
   const [viewMode, setViewMode] = useState("grid");

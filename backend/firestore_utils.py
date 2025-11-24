@@ -726,3 +726,32 @@ def get_strategies(uid: str, project_id: Optional[str] = None,
     
     return all_strategies
 
+
+def get_user_settings(uid: str) -> Dict:
+    """
+    Get user settings preferences
+    """
+    db = get_db()
+    if not db:
+        return {"currency": "NGN", "theme": "dark"}
+    
+    settings_ref = db.collection('users').document(uid).collection('settings').document('preferences')
+    doc = settings_ref.get()
+    
+    if not doc.exists:
+        return {"currency": "NGN", "theme": "dark"}
+        
+    return doc.to_dict()
+
+def update_user_settings(uid: str, settings_data: Dict) -> bool:
+    """
+    Update user settings preferences
+    """
+    db = get_db()
+    if not db:
+        return True
+    
+    settings_ref = db.collection('users').document(uid).collection('settings').document('preferences')
+    settings_ref.set(settings_data, merge=True)
+    
+    return True

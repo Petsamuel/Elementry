@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from models import DeconstructionRequest, DeconstructionResult, PivotRequest, DiagnosisRequest, StrategyRequest, StrategyUpdateRequest
+from models import DeconstructionRequest, DeconstructionResult, PivotRequest, DiagnosisRequest, DiagnosisResult, StrategyRequest, StrategyUpdateRequest, SettingsUpdate
 from engine import deconstruct_business_idea, generate_diagnosis
 from auth import verify_token, sync_user_to_firestore, check_ai_limit, increment_ai_usage
 from typing import Annotated
@@ -414,6 +414,32 @@ async def update_strategy_status_endpoint(
         raise HTTPException(status_code=400, detail="Invalid status or strategy not found")
     
     return {"success": success, "status": new_status}
+
+@app.get("/settings")
+async def get_settings_endpoint(token_data: dict = Depends(get_token)):
+    """Get user settings"""
+    from firestore_utils import get_user_settings
+    
+    settings = get_user_settings(token_data['uid'])
+    return settings
+
+@app.patch("/settings")
+async def update_settings_endpoint(
+    settings: SettingsUpdate,
+    token_data: dict = Depends(get_token)
+):
+    """Update user settings"""
+    from firestore_utils import update_user_settings
+    
+    # Convert to dict and remove None values
+    settings_dict = {k: v for k, v in settings.dict().items() if v is not None}
+    
+    success = update_user_settings(token_data['uid'], settings_dict)
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to update settings")
+    
+    return {"success": success}
 
 
 

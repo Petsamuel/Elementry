@@ -97,6 +97,7 @@ export const StrategyListItem = ({
   onDelete,
   onStatusChange,
   onAnalyze,
+  isAnalyzing,
 }) => {
   const isFix = strategy.type === "fix";
   const isPivot = strategy.type === "pivot";
@@ -241,13 +242,30 @@ export const StrategyListItem = ({
         {isPotential ? (
           <button
             onClick={() => onAnalyze(strategy)}
-            className="w-full py-3 rounded-xl bg-accent/10 border border-accent/20 text-accent font-bold text-sm hover:bg-accent hover:text-black transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden"
+            disabled={isAnalyzing}
+            className={`w-full py-3 rounded-xl border font-bold text-sm transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden ${
+              isAnalyzing
+                ? "bg-accent/20 border-accent/30 text-accent cursor-wait"
+                : "bg-accent/10 border-accent/20 text-accent hover:bg-accent hover:text-black"
+            }`}
           >
-            <span className="relative z-10 flex items-center gap-2">
-              <Lock className="w-4 h-4 group-hover/btn:hidden" />
-              <Sparkles className="w-4 h-4 hidden group-hover/btn:block" />
-              Unlock Strategy
-            </span>
+            {isAnalyzing ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-4 h-4" />
+                </motion.div>
+                Unlocking...
+              </>
+            ) : (
+              <span className="relative z-10 flex items-center gap-2">
+                <Lock className="w-4 h-4 group-hover/btn:hidden" />
+                <Sparkles className="w-4 h-4 hidden group-hover/btn:block" />
+                Unlock Strategy
+              </span>
+            )}
           </button>
         ) : (
           <button

@@ -142,7 +142,7 @@ def _get_mock_data(idea: str, currency: str = "USD") -> DeconstructionResult:
     )
 
 
-async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotAnalysisResult:
+async def generate_pivot_analysis(original_idea: str, pivot_name: str, currency: str = "USD") -> PivotAnalysisResult:
     """
     Generates a detailed analysis for a pivot opportunity using OpenRouter.
     """
@@ -164,9 +164,9 @@ It is very important that you analyze  ideas based on the local context of the s
         - Market Fit: "High", "Medium-High", "Medium", "Growing", or "Low"—framed with a quick story snippet (but keep it in the string).
         - Market Fit Score: 0-100, tied to data-driven intuition.
         - Recommended Actions: 5-7 specific, actionable steps, each with priority (High/Medium/Low). Phrase them engagingly, like "First, scout the terrain (High priority: Validate demand with quick surveys—don't charge blind!").
-        - Required Resources: 3-5 key items, listed practically with a touch of humor (e.g., "A full-stack developer—your tech wizard; $10k marketing budget—fuel for the launch rocket").
+        - Required Resources: 3-5 key items, listed practically with a touch of humor (e.g., "A full-stack developer—your tech wizard; 10,000 {currency} marketing budget—fuel for the launch rocket").
         - Estimated Timeline: e.g., "12 weeks" or "6 months"—realistic, like setting waypoints on a journey.
-        - Estimated Investment: e.g., "$5k - $10k"—honest about the treasure needed upfront.
+        - Estimated Investment: e.g., "5,000 {currency} - 10,000 {currency}"—honest about the treasure needed upfront.
         - Risk Level: "Low", "Medium", "High"—with a humorous nod to the dragons ahead.
         - Risk Factors: 3-5 potential pitfalls, described vividly yet actionably (e.g., "Competitor ambushes: Stay vigilant, or they'll steal your thunder").
         - Milestones: 4 key achievements, each with name, due_weeks (from start), and description—story-like markers of progress (e.g., "Summit the First Hill (Week 4): MVP built, ready for early testers").
@@ -253,7 +253,7 @@ def _get_mock_pivot_data(pivot_name: str) -> PivotAnalysisResult:
         ]
     )
 
-async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
+async def generate_diagnosis(idea: str, challenges: str, currency: str = "USD") -> DiagnosisResult:
     """
     Diagnose business challenges using OpenRouter.
     """
@@ -273,7 +273,7 @@ async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
         - Weak Link: Identify the single most critical bottleneck.
         - Weak Link Detail: Explain WHY this is the weak link in 2-3 sentences, using the Utibe Okuk persona (calm, wise, slightly humorous).
         - Root Cause: What is the underlying issue? (e.g., "Lack of market validation", "Inefficient supply chain").
-	- Also Diagnose ideas based on the local context of the selected currency’s country
+	- Also Diagnose ideas based on the local context of the selected currency’s country ({currency}).
         - Immediate Fix: A concrete, actionable step to resolve this NOW. Mention costs in {currency} if applicable.
         - Strategic Adjustment: A long-term pivot or change to prevent recurrence.
         - Viability Score: 0-100 score of the business's current health.

@@ -48,7 +48,11 @@ const TabButton = ({ active, onClick, children, icon: Icon }) => (
       />
     )}
     <span className="relative z-10 flex items-center gap-2">
-      {Icon && <Icon className={`w-4 h-4 lg:block hidden ${active ? "text-accent" : ""}`} />}
+      {Icon && (
+        <Icon
+          className={`w-4 h-4 lg:block hidden ${active ? "text-accent" : ""}`}
+        />
+      )}
       {children}
     </span>
   </button>
@@ -83,6 +87,7 @@ export default function PivotPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStrategy, setEditingStrategy] = useState(null);
   const [activeTab, setActiveTab] = useState("overview"); // 'overview' | 'board' | 'evolution'
+  const [analyzingStrategyId, setAnalyzingStrategyId] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -216,7 +221,10 @@ export default function PivotPage() {
   // --- Handlers ---
 
   const handleAnalyze = (strategy) => {
-    createPivotMutation.mutate(strategy.title);
+    setAnalyzingStrategyId(strategy.id);
+    createPivotMutation.mutate(strategy.title, {
+      onSettled: () => setAnalyzingStrategyId(null),
+    });
   };
 
   const handleStatusChange = (id, newStatus) => {
@@ -551,6 +559,7 @@ export default function PivotPage() {
               onDelete={handleDeleteStrategy}
               onStatusChange={handleStatusChange}
               onAnalyze={handleAnalyze}
+              analyzingStrategyId={analyzingStrategyId}
             />
           )}
 
@@ -708,6 +717,84 @@ export default function PivotPage() {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
+
+      {/* Creative Loading Overlay for Deconstruction */}
+      <AnimatePresence>
+        {deconstructMutation.isPending && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8"
+          >
+            <div className="relative w-32 h-32 mb-8">
+              <motion.div
+                className="absolute inset-0 border-4 border-accent/30 rounded-full"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <motion.div
+                className="absolute inset-0 border-4 border-t-accent border-r-transparent border-b-transparent border-l-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+              />
+              <Sparkles className="absolute inset-0 m-auto w-12 h-12 text-accent animate-pulse" />
+            </div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-black text-white mb-4 text-center"
+            >
+              Deconstructing Reality...
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-gray-400 text-lg max-w-md text-center"
+            >
+              Breaking down your idea into elemental components. Applying{" "}
+              {currency} market context...
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Creative Loading Overlay for Diagnosis */}
+      <AnimatePresence>
+        {diagnoseMutation.isPending && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8"
+          >
+            <div className="relative w-32 h-32 mb-8">
+              <motion.div
+                className="absolute inset-0 border-4 border-red-500/30 rounded-full"
+                animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+              <Stethoscope className="absolute inset-0 m-auto w-12 h-12 text-red-500 animate-bounce" />
+            </div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-black text-white mb-4 text-center"
+            >
+              Running System Diagnosis
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-gray-400 text-lg max-w-md text-center"
+            >
+              Identifying weak links and bottlenecks in your strategy...
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
