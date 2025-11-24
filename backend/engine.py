@@ -1,6 +1,8 @@
 import os
 import json
+import asyncio
 import google.generativeai as genai
+from google.api_core.exceptions import ResourceExhausted
 from dotenv import load_dotenv
 from models import DeconstructionResult, BusinessElement, PivotAnalysisResult, DiagnosisResult
 import traceback
@@ -69,22 +71,38 @@ async def deconstruct_business_idea(idea: str, currency: str = "USD") -> Deconst
         }}
         """
 
-    try:
-        response = model.generate_content(prompt)
-        print(f"DEBUG: Gemini Response for Deconstruction:\n{response.text}")
-        text = response.text.strip()
-        # Clean up markdown if present
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
+    max_retries = 3
+    base_delay = 2
+
+    for attempt in range(max_retries):
+        try:
+            response = await model.generate_content_async(prompt)
+            print(f"DEBUG: Gemini Response for Deconstruction:\n{response.text}")
+            text = response.text.strip()
+            # Clean up markdown if present
+            if text.startswith("```json"):
+                text = text[7:]
+            if text.endswith("```"):
+                text = text[:-3]
             
-        data = json.loads(text)
-        return DeconstructionResult(**data)
-    except Exception as e:
-        print(f"Error calling Gemini: {e}")
-        traceback.print_exc()
-        return _get_mock_data(idea, currency)
+            data = json.loads(text)
+            return DeconstructionResult(**data)
+            
+        except ResourceExhausted as e:
+            print(f"WARNING: Gemini quota exceeded (Attempt {attempt + 1}/{max_retries}). Retrying in {base_delay * (2 ** attempt)}s...")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(base_delay * (2 ** attempt))
+            else:
+                print("ERROR: Max retries reached for Gemini quota.")
+                traceback.print_exc()
+                return _get_mock_data(idea, currency)
+                
+        except Exception as e:
+            print(f"Error calling Gemini: {e}")
+            traceback.print_exc()
+            return _get_mock_data(idea, currency)
+            
+    return _get_mock_data(idea, currency)
 
 def _get_mock_data(idea: str, currency: str = "USD") -> DeconstructionResult:
     mock_elements = [
@@ -156,21 +174,37 @@ async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotA
         }}
         """
 
-    try:
-        response = model.generate_content(prompt)
-        print(f"DEBUG: Gemini Response for Pivot:\n{response.text}")
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
+    max_retries = 3
+    base_delay = 2
+
+    for attempt in range(max_retries):
+        try:
+            response = await model.generate_content_async(prompt)
+            print(f"DEBUG: Gemini Response for Pivot:\n{response.text}")
+            text = response.text.strip()
+            if text.startswith("```json"):
+                text = text[7:]
+            if text.endswith("```"):
+                text = text[:-3]
             
-        data = json.loads(text)
-        return PivotAnalysisResult(**data)
-    except Exception as e:
-        print(f"Error calling Gemini for pivot: {e}")
-        traceback.print_exc()
-        return _get_mock_pivot_data(pivot_name)
+            data = json.loads(text)
+            return PivotAnalysisResult(**data)
+            
+        except ResourceExhausted as e:
+            print(f"WARNING: Gemini quota exceeded for pivot (Attempt {attempt + 1}/{max_retries}). Retrying...")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(base_delay * (2 ** attempt))
+            else:
+                print("ERROR: Max retries reached for Gemini pivot quota.")
+                traceback.print_exc()
+                return _get_mock_pivot_data(pivot_name)
+                
+        except Exception as e:
+            print(f"Error calling Gemini for pivot: {e}")
+            traceback.print_exc()
+            return _get_mock_pivot_data(pivot_name)
+
+    return _get_mock_pivot_data(pivot_name)
 
 def _get_mock_pivot_data(pivot_name: str) -> PivotAnalysisResult:
     return PivotAnalysisResult(
@@ -230,21 +264,37 @@ async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
         }}
     """
 
-    try:
-        response = model.generate_content(prompt)
-        print(f"DEBUG: Gemini Response for Diagnosis:\n{response.text}")
-        text = response.text.strip()
-        if text.startswith("```json"):
-            text = text[7:]
-        if text.endswith("```"):
-            text = text[:-3]
+    max_retries = 3
+    base_delay = 2
+
+    for attempt in range(max_retries):
+        try:
+            response = await model.generate_content_async(prompt)
+            print(f"DEBUG: Gemini Response for Diagnosis:\n{response.text}")
+            text = response.text.strip()
+            if text.startswith("```json"):
+                text = text[7:]
+            if text.endswith("```"):
+                text = text[:-3]
             
-        data = json.loads(text)
-        return DiagnosisResult(**data)
-    except Exception as e:
-        print(f"Error calling Gemini for diagnosis: {e}")
-        traceback.print_exc()
-        return _get_mock_diagnosis_data()
+            data = json.loads(text)
+            return DiagnosisResult(**data)
+            
+        except ResourceExhausted as e:
+            print(f"WARNING: Gemini quota exceeded for diagnosis (Attempt {attempt + 1}/{max_retries}). Retrying...")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(base_delay * (2 ** attempt))
+            else:
+                print("ERROR: Max retries reached for Gemini diagnosis quota.")
+                traceback.print_exc()
+                return _get_mock_diagnosis_data()
+                
+        except Exception as e:
+            print(f"Error calling Gemini for diagnosis: {e}")
+            traceback.print_exc()
+            return _get_mock_diagnosis_data()
+
+    return _get_mock_diagnosis_data()
 
 def _get_mock_diagnosis_data() -> DiagnosisResult:
     return DiagnosisResult(

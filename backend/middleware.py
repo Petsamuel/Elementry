@@ -19,8 +19,8 @@ class RateLimiter:
         
         if len(self.requests[client_ip]) >= self.requests_per_minute:
             raise HTTPException(
-                status_code=429,
-                detail="Too many requests. Please try again later."
+                status_code=503,
+                detail="Rate limit exceeded. Please try again later."
             )
             
         self.requests[client_ip].append(now)
