@@ -373,12 +373,24 @@ def create_pivot(uid: str, pivot_data: Dict) -> str:
     
     # Add metadata
     pivot_data['created_at'] = firestore.SERVER_TIMESTAMP
-    pivot_data['status'] = 'active'
+    pivot_data['updated_at'] = firestore.SERVER_TIMESTAMP
+    pivot_data['status'] = pivot_data.get('status', 'discovery')  # Default to discovery
+    
+    # Add type field for Strategy Board compatibility
+    if 'type' not in pivot_data:
+        pivot_data['type'] = 'pivot'
+    
+    # Ensure we have title and description fields
+    if 'title' not in pivot_data and 'pivot_name' in pivot_data:
+        pivot_data['title'] = pivot_data['pivot_name']
+    
+    if 'description' not in pivot_data:
+        pivot_data['description'] = pivot_data.get('analysis', {}).get('market_fit', 'Pivot opportunity')
     
     # Ensure analysis status is set if not present
     if 'analysis' in pivot_data:
         if 'status' not in pivot_data['analysis']:
-            pivot_data['analysis']['status'] = 'active'
+            pivot_data['analysis']['status'] = pivot_data['status']
         if 'progress_percentage' not in pivot_data['analysis']:
             pivot_data['analysis']['progress_percentage'] = 0
             
@@ -409,11 +421,40 @@ def get_pivots(uid: str, project_id: Optional[str] = None) -> List[Dict]:
         data = doc.to_dict()
         data['id'] = doc.id
         
+        # Ensure compatibility with Strategy Board
+        # Map pivot_name to title if title doesn't exist
+        if 'title' not in data and 'pivot_name' in data:
+            data['title'] = data['pivot_name']
+        
+        # Ensure description exists
+        if 'description' not in data:
+            data['description'] = data.get('analysis', {}).get('market_fit', 'Pivot opportunity')
+        
+        # Ensure type field exists
+        if 'type' not in data:
+            data['type'] = 'pivot'
+        
+        # Map old status values to new ones for Strategy Board
+        status = data.get('status', 'discovery')
+        status_mapping = {
+            'active': 'discovery',
+            'in_progress': 'validation',
+            'completed': 'success',
+            'on_hold': 'validation',
+            'abandoned': 'potential'
+        }
+        data['status'] = status_mapping.get(status, status)
+        
         # Convert timestamps
         if 'created_at' in data and data['created_at']:
             ts = data['created_at']
             if hasattr(ts, 'isoformat'):
                 data['created_at'] = ts.isoformat()
+        
+        if 'updated_at' in data and data['updated_at']:
+            ts = data['updated_at']
+            if hasattr(ts, 'isoformat'):
+                data['updated_at'] = ts.isoformat()
                 
         pivots.append(data)
     
@@ -481,27 +522,43 @@ def update_pivot_action(uid: str, pivot_id: str, action_index: int, completed: b
 
 def update_pivot_status(uid: str, pivot_id: str, new_status: str) -> bool:
     """
-    Update the status of a pivot simulation
-    Valid statuses: active, in_progress, completed, on_hold, abandoned
+    Update the status of a pivot/strategy.
+    Valid statuses: potential, discovery, validation, growth, success
+    (Also supports legacy: active, in_progress, completed, on_hold, abandoned)
     """
     from datetime import datetime
     db = get_db()
     if not db:
         return False
     
-    valid_statuses = ['active', 'in_progress', 'completed', 'on_hold', 'abandoned']
+    # Support both new and old status values
+    valid_statuses = [
+        'potential', 'discovery', 'validation', 'growth', 'success',  # New
+        'active', 'in_progress', 'completed', 'on_hold', 'abandoned'  # Legacy
+    ]
     if new_status not in valid_statuses:
         return False
+    
+    # Map legacy statuses to new ones
+    status_mapping = {
+        'active': 'discovery',
+        'in_progress': 'validation',
+        'completed': 'success',
+        'on_hold': 'validation',
+        'abandoned': 'potential'
+    }
+    mapped_status = status_mapping.get(new_status, new_status)
     
     pivot_ref = db.collection('users').document(uid).collection('pivots').document(pivot_id)
     
     update_data = {
-        'analysis.status': new_status,
+        'status': mapped_status,
         'updated_at': firestore.SERVER_TIMESTAMP
     }
     
-    # Set completion timestamp if marking as completed
-    if new_status == 'completed':
+    # Also update analysis status if it exists
+    if mapped_status in ['success', 'completed']:
+        update_data['analysis.status'] = mapped_status
         update_data['analysis.completed_at'] = datetime.now().isoformat()
     
     pivot_ref.update(update_data)
@@ -547,4 +604,109 @@ def update_project_diagnosis(uid: str, project_id: str, diagnosis_data: Dict) ->
     })
     
     return True
+
+
+# ============================================================================
+# NEW STRATEGY FUNCTIONS
+# ============================================================================
+
+def create_strategy(uid: str, strategy_data: Dict) -> str:
+    """
+    Create a new strategy (pivot or fix) for user.
+    Returns: strategy_id
+    """
+    db = get_db()
+    if not db:
+        return "mock-strategy-id"
+    
+    strategies_ref = db.collection('users').document(uid).collection('strategies')
+    
+    # Add metadata
+    strategy_data['created_at'] = firestore.SERVER_TIMESTAMP
+    strategy_data['updated_at'] = firestore.SERVER_TIMESTAMP
+    
+    # Set default status based on whether analysis exists
+    if 'status' not in strategy_data:
+        strategy_data['status'] = 'discovery' if 'analysis' in strategy_data else 'potential'
+    
+    # Ensure type field exists
+    if 'type' not in strategy_data:
+        strategy_data['type'] = 'pivot'
+    
+    # Ensure title exists
+    if 'title' not in strategy_data and 'strategy_name' in strategy_data:
+        strategy_data['title'] = strategy_data['strategy_name']
+    
+    # Ensure description exists
+    if 'description' not in strategy_data:
+        strategy_data['description'] = strategy_data.get('analysis', {}).get('market_fit', 'Strategy opportunity')
+    
+    # Create strategy
+    strategy_ref = strategies_ref.document()
+    strategy_ref.set(strategy_data)
+    
+    return strategy_ref.id
+
+
+def get_strategies(uid: str, project_id: Optional[str] = None, 
+                   strategy_type: Optional[str] = None,
+                   status: Optional[str] = None) -> List[Dict]:
+    """
+    Fetch strategies with optional filters.
+    Merges data from both pivots and strategies collections.
+    """
+    db = get_db()
+    if not db:
+        return []
+    
+    all_strategies = []
+    
+    # Get from pivots collection (legacy)
+    pivots = get_pivots(uid, project_id)
+    all_strategies.extend(pivots)
+    
+    # Get from strategies collection (new)
+    strategies_ref = db.collection('users').document(uid).collection('strategies')
+    
+    query = strategies_ref
+    if project_id:
+        query = query.where('project_id', '==', project_id)
+    
+    for doc in query.stream():
+        data = doc.to_dict()
+        data['id'] = doc.id
+        
+        # Ensure required fields
+        if 'title' not in data and 'strategy_name' in data:
+            data['title'] = data['strategy_name']
+        
+        if 'description' not in data:
+            data['description'] = data.get('analysis', {}).get('market_fit', 'Strategy opportunity')
+        
+        if 'type' not in data:
+            data['type'] = 'pivot'
+        
+        # Convert timestamps
+        if 'created_at' in data and data['created_at']:
+            ts = data['created_at']
+            if hasattr(ts, 'isoformat'):
+                data['created_at'] = ts.isoformat()
+        
+        if 'updated_at' in data and data['updated_at']:
+            ts = data['updated_at']
+            if hasattr(ts, 'isoformat'):
+                data['updated_at'] = ts.isoformat()
+        
+        all_strategies.append(data)
+    
+    # Apply filters
+    if strategy_type:
+        all_strategies = [s for s in all_strategies if s.get('type') == strategy_type]
+    if status:
+        all_strategies = [s for s in all_strategies if s.get('status') == status]
+    
+    # Sort by created_at
+    all_strategies.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    return all_strategies
 

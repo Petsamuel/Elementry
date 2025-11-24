@@ -1,0 +1,187 @@
+/* StrategyBoard.module.css */
+
+/* --- 3D & Perspective --- */
+.perspectiveContainer {
+    perspective: 2000px;
+    transform-style: preserve-3d;
+}
+
+.card3D {
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+    will-change: transform;
+}
+
+.card3D:hover {
+    transform: translateY(-10px) rotateX(2deg) rotateY(2deg) scale(1.02);
+    box-shadow:
+        0 20px 40px -10px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.05) inset;
+    z-index: 10;
+}
+
+/* --- Glassmorphism --- */
+.glassPanel {
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glassCard {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.03) 0%,
+            rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- Animations --- */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.floating {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+}
+
+.pulseGlow {
+    animation: pulse-glow 3s infinite;
+}
+
+@keyframes gradient-border {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animatedBorder {
+    position: relative;
+}
+
+.animatedBorder::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(45deg, #ff00cc, #3333ff, #00ff00);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    background-size: 200% 200%;
+    animation: gradient-border 4s ease infinite;
+    pointer-events: none;
+}
+
+/* --- Particles --- */
+.particleContainer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.particle {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.1;
+    animation: float 10s infinite linear;
+}
+
+/* --- Custom Scrollbar --- */
+.customScrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.customScrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 3px;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Layout Utilities --- */
+.gridBoard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    padding: 8px;
+}
+
+.kanbanBoard {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding-bottom: 24px;
+    height: calc(100vh - 250px);
+    align-items: flex-start;
+}
+
+.kanbanColumn {
+    min-width: 320px;
+    max-width: 320px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+}
+
+/* --- Typography --- */
+.textGradient {
+    background: linear-gradient(to right, #ffffff, #a0a0a0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.textGradientAccent {
+    background: linear-gradient(to right, #00ff00, #00cc00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}

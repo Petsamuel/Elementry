@@ -112,8 +112,8 @@
 }
 
 ::-webkit-scrollbar {
-  width: 6px !important;
-  /* Thin scrollbar */
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {

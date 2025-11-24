@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from enum import Enum
 
 class BusinessElement(BaseModel):
     name: str
@@ -55,3 +56,23 @@ class PivotAnalysisResult(BaseModel):
     risk_level: str
     risk_factors: List[str]
     milestones: List[dict]  # {"name": str, "due_weeks": int, "description": str}
+
+class StrategyType(str, Enum):
+    PIVOT = "pivot"
+    FIX = "fix"
+
+class StrategyStatus(str, Enum):
+    POTENTIAL = "potential"
+    DISCOVERY = "discovery"
+    VALIDATION = "validation"
+    GROWTH = "growth"
+    SUCCESS = "success"
+
+class StrategyRequest(BaseModel):
+    project_id: str
+    strategy_name: str
+    strategy_type: StrategyType
+    description: Optional[str] = None
+
+class StrategyUpdateRequest(BaseModel):
+    status: StrategyStatus

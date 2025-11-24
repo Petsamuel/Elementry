@@ -1,9 +1,11 @@
-import { useState} from "react";
+import { useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../services/api";
 import toast from "react-hot-toast";
+import * as Dialog from "@radix-ui/react-dialog";
+import * as Tabs from "@radix-ui/react-tabs";
 import {
   GitBranch,
   Target,
@@ -17,11 +19,16 @@ import {
   FolderOpen,
   Network,
   Plus,
+  X,
+  Sparkles,
+  Loader2,
+  Send,
 } from "lucide-react";
 import {
   StrategyListItem,
   StrategyDetailView,
 } from "../components/PivotComponents";
+import StrategyBoard from "../components/StrategyBoard";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 // --- Utility Components ---
@@ -70,6 +77,8 @@ export default function PivotPage() {
   const { user, selectedProjectId, setSelectedProjectId } = useAuthStore();
   const [showDiagnosisForm, setShowDiagnosisForm] = useState(false);
   const [challenges, setChallenges] = useState("");
+  const [newProjectIdea, setNewProjectIdea] = useState("");
+  const [diagnosisTab, setDiagnosisTab] = useState("select"); // 'select' | 'new'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStrategy, setEditingStrategy] = useState(null);
   const [activeTab, setActiveTab] = useState("overview"); // 'overview' | 'board' | 'evolution'
@@ -173,10 +182,25 @@ export default function PivotPage() {
       toast.success("Diagnosis complete!");
       queryClient.invalidateQueries(["project", selectedProjectId]);
       setShowDiagnosisForm(false);
+      setChallenges("");
     },
     onError: (error) => {
       console.error("Diagnosis failed:", error);
       toast.error("Failed to run diagnosis.");
+    },
+  });
+
+  const deconstructMutation = useMutation({
+    mutationFn: async ({ idea, token }) => api.deconstructIdea(idea, token),
+    onSuccess: (data) => {
+      toast.success("Project created! Running diagnosis...");
+      setSelectedProjectId(data.project_id);
+      // Automatically run diagnosis on the new project
+      handleRunDiagnosis(null, data.project_id);
+    },
+    onError: (error) => {
+      console.error("Deconstruction failed:", error);
+      toast.error("Failed to create project.");
     },
   });
 
@@ -195,18 +219,38 @@ export default function PivotPage() {
     toast.error("Delete not yet implemented in backend");
   };
 
-  const handleRunDiagnosis = async (e) => {
-    e.preventDefault();
-    if (!challenges.trim()) return;
+  const handleRunDiagnosis = async (e, overrideProjectId = null) => {
+    if (e) e.preventDefault();
+
+    const projectId = overrideProjectId || selectedProjectId;
+
+    if (!projectId) {
+      toast.error("Please select a project first");
+      return;
+    }
+
     try {
       const token = await user.getIdToken();
       diagnoseMutation.mutate({
-        projectId: selectedProjectId,
-        challenges,
+        projectId,
+        challenges: challenges || "General diagnosis",
         token,
       });
     } catch (error) {
       console.error("Error running diagnosis:", error);
+    }
+  };
+
+  const handleCreateAndDiagnose = async () => {
+    if (!newProjectIdea.trim()) {
+      toast.error("Please enter a project idea");
+      return;
+    }
+    try {
+      const token = await user.getIdToken();
+      deconstructMutation.mutate({ idea: newProjectIdea, token });
+    } catch (error) {
+      console.error("Error creating project:", error);
     }
   };
 
@@ -488,38 +532,16 @@ export default function PivotPage() {
 
           {/* STRATEGY BOARD TAB */}
           {activeTab === "board" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">
-                    Strategy Board
-                  </h2>
-                  <p className="text-gray-400 text-sm">
-                    Manage your pivot opportunities and fixes.
-                  </p>
-                </div>
-                {/* <button className="btn-primary px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-bold">
-                  <Plus className="w-4 h-4" />
-                  New Strategy
-                </button> */}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {strategies.map((strategy, index) => (
-                  <StrategyListItem
-                    key={strategy.id}
-                    strategy={strategy}
-                    onEdit={(s) => {
-                      setEditingStrategy(s);
-                      setIsModalOpen(true);
-                    }}
-                    onDelete={handleDeleteStrategy}
-                    onStatusChange={handleStatusChange}
-                    onAnalyze={handleAnalyze}
-                  />
-                ))}
-              </div>
-            </div>
+            <StrategyBoard
+              strategies={strategies}
+              onEdit={(s) => {
+                setEditingStrategy(s);
+                setIsModalOpen(true);
+              }}
+              onDelete={handleDeleteStrategy}
+              onStatusChange={handleStatusChange}
+              onAnalyze={handleAnalyze}
+            />
           )}
 
           {/* EVOLUTION TAB (Placeholder) */}
@@ -546,6 +568,136 @@ export default function PivotPage() {
           setIsModalOpen(false);
         }}
       />
+
+      {/* Diagnosis Modal */}
+      <Dialog.Root open={showDiagnosisForm} onOpenChange={setShowDiagnosisForm}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 animate-in fade-in duration-200" />
+          <Dialog.Content className="fixed top-[5%] left-1/2 -translate-x-1/2 w-full max-w-xl bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl z-50 animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <Dialog.Title className="text-xl font-bold text-white flex items-center gap-3">
+                <Stethoscope className="w-5 h-5 text-accent" />
+                Run AI Diagnosis
+              </Dialog.Title>
+              <Dialog.Close className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </Dialog.Close>
+            </div>
+
+            <Tabs.Root
+              value={diagnosisTab}
+              onValueChange={setDiagnosisTab}
+              className="p-6"
+            >
+              <Tabs.List className="flex gap-4 mb-6 bg-white/5 p-1 rounded-xl">
+                <Tabs.Trigger
+                  value="select"
+                  className="flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 data-[state=active]:bg-white/10 data-[state=active]:text-white transition-all"
+                >
+                  Select Project
+                </Tabs.Trigger>
+                <Tabs.Trigger
+                  value="new"
+                  className="flex-1 py-2 text-sm font-medium rounded-lg text-gray-400 data-[state=active]:bg-white/10 data-[state=active]:text-white transition-all"
+                >
+                  New Project
+                </Tabs.Trigger>
+              </Tabs.List>
+
+              <Tabs.Content value="select" className="space-y-4 outline-none">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
+                    Select Project to Diagnose
+                  </label>
+                  <div className="grid gap-2 max-h-60 overflow-y-auto custom-scrollbar">
+                    {recentProjects.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedProjectId(p.id)}
+                        className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                          selectedProjectId === p.id
+                            ? "bg-accent/10 border-accent/30 text-white"
+                            : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10"
+                        }`}
+                      >
+                        <FolderOpen className="w-4 h-4" />
+                        <span className="flex-1 truncate">{p.name}</span>
+                        {selectedProjectId === p.id && (
+                          <CheckCircle2 className="w-4 h-4 text-accent" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
+                    Specific Challenges (Optional)
+                  </label>
+                  <textarea
+                    value={challenges}
+                    onChange={(e) => setChallenges(e.target.value)}
+                    placeholder="Describe specific issues you're facing..."
+                    className="w-full h-24 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-accent focus:bg-white/10 outline-none resize-none"
+                  />
+                </div>
+
+                <button
+                  onClick={handleRunDiagnosis}
+                  disabled={diagnoseMutation.isPending || !selectedProjectId}
+                  className="w-full btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 mt-4"
+                >
+                  {diagnoseMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Diagnosing...
+                    </>
+                  ) : (
+                    <>
+                      <Stethoscope className="w-4 h-4" />
+                      Run Diagnosis
+                    </>
+                  )}
+                </button>
+              </Tabs.Content>
+
+              <Tabs.Content value="new" className="space-y-4 outline-none">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
+                    Describe Your New Idea
+                  </label>
+                  <textarea
+                    value={newProjectIdea}
+                    onChange={(e) => setNewProjectIdea(e.target.value)}
+                    placeholder="Describe your product idea to create a new project and run diagnosis..."
+                    className="w-full h-40 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-accent focus:bg-white/10 outline-none resize-none"
+                  />
+                </div>
+
+                <button
+                  onClick={handleCreateAndDiagnose}
+                  disabled={
+                    deconstructMutation.isPending || !newProjectIdea.trim()
+                  }
+                  className="w-full btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 mt-4"
+                >
+                  {deconstructMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating & Diagnosing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Create & Diagnose
+                    </>
+                  )}
+                </button>
+              </Tabs.Content>
+            </Tabs.Root>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }

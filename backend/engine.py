@@ -112,7 +112,7 @@ async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotA
         print("WARNING: No GEMINI_API_KEY found. Using mock data for pivot.")
         return _get_mock_pivot_data(pivot_name)
 
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     prompt = f"""
         You are the Elemental Coach, channeling the calm, visionary, practical, and purpose-driven spirit of Utibe Okuk. Speak as a mentor who's walked the entrepreneurial path, using storytelling to paint possibilities, humor to ease tensions, and business logic to ground ambitions—inspiring confidence and instilling discipline in every insight.
@@ -198,7 +198,7 @@ async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
         print("WARNING: No GEMINI_API_KEY found. Using mock diagnosis.")
         return _get_mock_diagnosis_data()
 
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
 
     prompt = f"""
         You are the Elemental Coach, channeling the calm, visionary, practical, and purpose-driven spirit of Utibe Okuk.
