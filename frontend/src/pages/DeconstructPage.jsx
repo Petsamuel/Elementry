@@ -93,8 +93,13 @@ const Badge = ({ children, className = "" }) => (
 // --- Main Component ---
 
 export default function DeconstructPage() {
-  const { user, selectedProjectId, setSelectedProjectId, setCurrentPage } =
-    useAuthStore();
+  const {
+    user,
+    selectedProjectId,
+    setSelectedProjectId,
+    setCurrentPage,
+    currency,
+  } = useAuthStore();
   const [idea, setIdea] = useState("");
   const [results, setResults] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -136,7 +141,8 @@ export default function DeconstructPage() {
   }, [projectData, setSelectedProjectId]);
 
   const deconstructMutation = useMutation({
-    mutationFn: ({ idea, token }) => api.deconstructIdea(idea, token),
+    mutationFn: ({ idea, currency, token }) =>
+      api.deconstructIdea(idea, currency, token),
     onSuccess: (data) => {
       setResults(data);
       toast.success("Idea deconstructed successfully!");
@@ -184,7 +190,7 @@ export default function DeconstructPage() {
 
     try {
       const token = await user.getIdToken();
-      deconstructMutation.mutate({ idea, token });
+      deconstructMutation.mutate({ idea, currency, token });
     } catch (error) {
       console.error("Error getting token:", error);
       toast.error("Authentication error. Please try logging in again.");

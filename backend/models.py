@@ -11,6 +11,7 @@ class BusinessElement(BaseModel):
 class DeconstructionRequest(BaseModel):
     idea: str
     industry: Optional[str] = None
+    currency: Optional[str] = "USD"
 
 class DeconstructionResult(BaseModel):
     original_idea: str
@@ -19,6 +20,7 @@ class DeconstructionResult(BaseModel):
     pivot_options: List[str]
     sustainability_tip: str
     project_id: Optional[str] = None
+    currency: Optional[str] = "USD"
 
 class PivotRequest(BaseModel):
     project_id: str

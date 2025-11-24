@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export default function CheapestPointPage() {
-  const { user, selectedProjectId } = useAuthStore();
+  const { user, selectedProjectId, currency: userCurrency } = useAuthStore();
 
   const { data: projectData, isLoading } = useQuery({
     queryKey: ["project", selectedProjectId],

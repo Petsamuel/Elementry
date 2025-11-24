@@ -96,16 +96,35 @@ const Select = ({ label, value, options, onChange, icon: Icon }) => (
 );
 
 export default function SettingsPage() {
-  const { currency, setCurrency, settings, updateSettings } = useAuthStore();
+  const {
+    currency,
+    setCurrency,
+    settings,
+    updateSettings,
+    user,
+    selectedProjectId,
+  } = useAuthStore();
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      // If a project is selected, update its currency
+      if (selectedProjectId && user) {
+        const token = await user.getIdToken();
+        await api.updateProjectCurrency(selectedProjectId, currency, token);
+      }
+
+      // Simulate other settings save
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       toast.success("Settings saved successfully");
-    }, 1000);
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      toast.error("Failed to save settings");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const currencies = [

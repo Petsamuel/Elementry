@@ -14,13 +14,13 @@ if GENAI_API_KEY:
 else:
     print("WARNING: GEMINI_API_KEY not found in environment variables.")
 
-async def deconstruct_business_idea(idea: str) -> DeconstructionResult:
+async def deconstruct_business_idea(idea: str, currency: str = "USD") -> DeconstructionResult:
     """
     Deconstructs a business idea using Google Gemini.
     """
     if not GENAI_API_KEY:
         print("WARNING: No GEMINI_API_KEY found. Using mock data.")
-        return _get_mock_data(idea)
+        return _get_mock_data(idea, currency)
 
     model = genai.GenerativeModel('gemini-2.5-flash')
 
@@ -30,6 +30,7 @@ async def deconstruct_business_idea(idea: str) -> DeconstructionResult:
         Your core expertise is the "Elemental Business Model Deconstruction": breaking down ideas into modular elements that reveal hidden opportunities, much like dissecting a complex machine to see how each gear turns independently yet powers the whole.
 
         Business Idea: "{idea}"
+        Target Currency: "{currency}"
 
         Guidelines:
         - Deconstruct into EXACTLY 7 distinct business elements (sub-businesses). Each is a standalone module that could spin off, like chapters in a grand entrepreneurial story.
@@ -42,7 +43,7 @@ async def deconstruct_business_idea(idea: str) -> DeconstructionResult:
           6. Community Building (fostering networks and forums—creating tribes where ideas thrive and laughs are shared),
           7. Technology/Innovation (tools, apps, R&D—innovating like a mad scientist with practical genius).
         - For each element: Give a concise, evocative name; type (from above or similar); description (2-3 sentences weaving in storytelling, humor, and business logic on how it fits the idea, inspiring the user to see its potential); and monetization potential (High: scalable like a viral hit; Medium: steady as a loyal customer base; Low: supportive, like the unsung hero behind the scenes).
-        - Cheapest Entry Point: Describe the simplest, lowest-cost validation/start method in an encouraging, practical narrative (e.g., "Kick off with a free blog, testing waters like a cautious explorer dipping a toe in the ocean—minimal risk, maximum insight").
+        - Cheapest Entry Point: Describe the simplest, lowest-cost validation/start method in an encouraging, practical narrative (e.g., "Kick off with a free blog, testing waters like a cautious explorer dipping a toe in the ocean—minimal risk, maximum insight"). Mention costs in {currency}.
         - Pivot Options: 3-5 adjacent industries or variations, phrased as visionary opportunities with a touch of humor (e.g., "Pivot to wellness coaching: because who wouldn't want to turn sweat into serenity?").
         - Sustainability Tip: One key piece of advice for long-term success, delivered with purpose-driven wisdom and a hint of storytelling (e.g., "Build recurring revenue streams, like planting seeds that grow into a forest of financial stability—patience pays dividends").
 
@@ -63,7 +64,8 @@ async def deconstruct_business_idea(idea: str) -> DeconstructionResult:
                 // exactly 7 objects
             ],
             "pivot_options": ["string1", "string2", "string3"],  // 3-5 strings
-            "sustainability_tip": "string"
+            "sustainability_tip": "string",
+            "currency": "{currency}"
         }}
         """
 
@@ -82,9 +84,9 @@ async def deconstruct_business_idea(idea: str) -> DeconstructionResult:
     except Exception as e:
         print(f"Error calling Gemini: {e}")
         traceback.print_exc()
-        return _get_mock_data(idea)
+        return _get_mock_data(idea, currency)
 
-def _get_mock_data(idea: str) -> DeconstructionResult:
+def _get_mock_data(idea: str, currency: str = "USD") -> DeconstructionResult:
     mock_elements = [
         BusinessElement(name="Production", type="Core", description="Making the product", monetization_potential="High"),
         BusinessElement(name="Packaging", type="Branding", description="Designing the box", monetization_potential="Medium"),
@@ -97,10 +99,11 @@ def _get_mock_data(idea: str) -> DeconstructionResult:
 
     return DeconstructionResult(
         original_idea=idea,
-        cheapest_entry_point="Content (Start a blog/vlog about the process)",
+        cheapest_entry_point=f"Content (Start a blog/vlog about the process) - Cost: 0 {currency}",
         elements=mock_elements,
         pivot_options=["Pivot to Teaching", "Pivot to Supply Chain"],
-        sustainability_tip="Start small, reinvest profits from the cheapest entry point."
+        sustainability_tip="Start small, reinvest profits from the cheapest entry point.",
+        currency=currency
     )
 
 

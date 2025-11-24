@@ -74,7 +74,8 @@ const Badge = ({ children, className = "" }) => (
 );
 
 export default function PivotPage() {
-  const { user, selectedProjectId, setSelectedProjectId } = useAuthStore();
+  const { user, selectedProjectId, setSelectedProjectId, currency } =
+    useAuthStore();
   const [showDiagnosisForm, setShowDiagnosisForm] = useState(false);
   const [challenges, setChallenges] = useState("");
   const [newProjectIdea, setNewProjectIdea] = useState("");
@@ -198,7 +199,8 @@ export default function PivotPage() {
   });
 
   const deconstructMutation = useMutation({
-    mutationFn: async ({ idea, token }) => api.deconstructIdea(idea, token),
+    mutationFn: async ({ idea, currency, token }) =>
+      api.deconstructIdea(idea, currency, token),
     onSuccess: (data) => {
       toast.success("Project created! Running diagnosis...");
       setSelectedProjectId(data.project_id);
@@ -255,7 +257,7 @@ export default function PivotPage() {
     }
     try {
       const token = await user.getIdToken();
-      deconstructMutation.mutate({ idea: newProjectIdea, token });
+      deconstructMutation.mutate({ idea: newProjectIdea, currency, token });
     } catch (error) {
       console.error("Error creating project:", error);
     }

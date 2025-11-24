@@ -72,7 +72,7 @@ async def deconstruct(request: DeconstructionRequest, token_data: dict = Depends
     if not check_ai_limit(token_data['uid']):
         raise HTTPException(status_code=403, detail="AI generation limit reached for your plan. Upgrade to Pro for more.")
 
-    result = await deconstruct_business_idea(request.idea)
+    result = await deconstruct_business_idea(request.idea, request.currency)
     
     # Save as project
     from firestore_utils import create_project
@@ -175,6 +175,24 @@ async def update_project_status_endpoint(project_id: str, status_data: dict, tok
         raise HTTPException(status_code=400, detail="Status is required")
         
     success = update_project_status(token_data['uid'], project_id, status)
+    
+    # Invalidate cache
+    cache_key = (token_data['uid'], project_id)
+    if cache_key in project_cache:
+        del project_cache[cache_key]
+        
+    return {"success": success}
+
+@app.patch("/dashboard/projects/{project_id}/currency")
+async def update_project_currency_endpoint(project_id: str, currency_data: dict, token_data: dict = Depends(get_token)):
+    """Update project currency"""
+    from firestore_utils import update_project_currency
+    
+    currency = currency_data.get('currency')
+    if not currency:
+        raise HTTPException(status_code=400, detail="Currency is required")
+        
+    success = update_project_currency(token_data['uid'], project_id, currency)
     
     # Invalidate cache
     cache_key = (token_data['uid'], project_id)
@@ -287,79 +305,6 @@ async def update_pivot_status_endpoint(
         raise HTTPException(status_code=400, detail="Status is required")
     
     success = update_pivot_status(token_data['uid'], pivot_id, new_status)
-    if not success:
-        raise HTTPException(status_code=400, detail="Invalid status or pivot not found")
-    
-    return {"success": success, "status": new_status}
-
-@app.post("/projects/{project_id}/diagnose", dependencies=[Depends(rate_limiter)])
-async def diagnose_project_endpoint(
-    project_id: str,
-    request: DiagnosisRequest,
-    token_data: dict = Depends(get_token)
-):
-    """Diagnose business challenges"""
-    from firestore_utils import update_project_diagnosis, get_project
-    from engine import generate_diagnosis
-    
-    uid = token_data['uid']
-    
-    # Get project context
-    project = get_project(uid, project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-        
-    idea = project.get('name', '')
-    
-    # Generate diagnosis
-    diagnosis_result = await generate_diagnosis(idea, request.challenges)
-    
-    # Save to Firestore
-    success = update_project_diagnosis(uid, project_id, diagnosis_result.dict())
-    
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to save diagnosis")
-        
-    return diagnosis_result
-
-@app.get("/projects/{project_id}/board")
-async def get_strategy_board_endpoint(project_id: str, token_data: dict = Depends(get_token)):
-    """Get strategy board for a project"""
-    from firestore_utils import get_strategy_board
-    
-    board = get_strategy_board(token_data['uid'], project_id)
-    if not board:
-        # Return empty structure if not found
-        return {
-            "columns": {
-                "discovery": [],
-                "validation": [],
-                "growth": [],
-                "success": []
-            }
-        }
-    return board
-
-@app.post("/projects/{project_id}/board")
-async def save_strategy_board_endpoint(
-    project_id: str, 
-    board_data: dict, 
-    token_data: dict = Depends(get_token)
-):
-    """Save strategy board state"""
-    from firestore_utils import save_strategy_board
-    
-    success = save_strategy_board(token_data['uid'], project_id, board_data)
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to save board")
-        
-    return {"status": "success"}
-
-
-# ============================================================================
-# NEW STRATEGY ENDPOINTS
-# ============================================================================
-
 @app.post("/strategies", dependencies=[Depends(rate_limiter)])
 async def create_strategy_endpoint(request: StrategyRequest, token_data: dict = Depends(get_token)):
     """Create a new strategy (pivot or fix) with AI analysis"""

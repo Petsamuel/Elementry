@@ -605,6 +605,22 @@ def update_project_diagnosis(uid: str, project_id: str, diagnosis_data: Dict) ->
     
     return True
 
+def update_project_currency(uid: str, project_id: str, currency: str) -> bool:
+    """
+    Update project currency
+    """
+    db = get_db()
+    if not db:
+        return True
+    
+    project_ref = db.collection('users').document(uid).collection('projects').document(project_id)
+    project_ref.update({
+        'currency': currency,
+        'updated_at': firestore.SERVER_TIMESTAMP
+    })
+    
+    return True
+
 
 # ============================================================================
 # NEW STRATEGY FUNCTIONS

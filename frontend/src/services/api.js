@@ -16,10 +16,10 @@ export const api = {
     return response.data;
   },
 
-  deconstructIdea: async (idea, token) => {
+  deconstructIdea: async (idea, currency, token) => {
     const response = await axios.post(
       `${API_URL}/deconstruct`,
-      { idea },
+      { idea, currency },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -101,6 +101,17 @@ export const api = {
     const response = await axios.patch(
       `${API_URL}/dashboard/projects/${projectId}/status`,
       { status },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
+
+  updateProjectCurrency: async (projectId, currency, token) => {
+    const response = await axios.patch(
+      `${API_URL}/dashboard/projects/${projectId}/currency`,
+      { currency },
       {
         headers: { Authorization: `Bearer ${token}` },
       }
