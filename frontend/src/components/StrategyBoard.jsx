@@ -24,7 +24,7 @@ const TABS = [
   { id: "all", label: "Strategies" },
   { id: "pivot", label: "Pivots", icon: GitBranch },
   { id: "fix", label: "Fixes", icon: Zap },
-  { id: "potential", label: "Potential", icon: Sparkles },
+  // { id: "potential", label: "Potential", icon: Sparkles },
 ];
 
 const VIEW_MODES = [

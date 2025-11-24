@@ -374,13 +374,13 @@ export default function DeconstructPage() {
                     >
                       Blueprint
                     </TabButton>
-                    <TabButton
+                    {/* <TabButton
                       active={activeTab === "expansion"}
                       onClick={() => setActiveTab("expansion")}
                       icon={TrendingUp}
                     >
                       Expansion
-                    </TabButton>
+                    </TabButton> */}
                   </div>
                 </LayoutGroup>
               </div>

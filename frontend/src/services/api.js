@@ -173,10 +173,10 @@ export const api = {
     return response.data;
   },
 
-  diagnoseProject: async (projectId, challenges, token) => {
+  diagnoseProject: async (projectId, challenges, currency, token) => {
     const response = await axios.post(
       `${API_URL}/projects/${projectId}/diagnose`,
-      { project_id: projectId, challenges },
+      { project_id: projectId, challenges, currency },
       {
         headers: { Authorization: `Bearer ${token}` },
       }

@@ -48,7 +48,7 @@ const TabButton = ({ active, onClick, children, icon: Icon }) => (
       />
     )}
     <span className="relative z-10 flex items-center gap-2">
-      {Icon && <Icon className={`w-4 h-4 ${active ? "text-accent" : ""}`} />}
+      {Icon && <Icon className={`w-4 h-4 lg:block hidden ${active ? "text-accent" : ""}`} />}
       {children}
     </span>
   </button>
@@ -155,7 +155,7 @@ export default function PivotPage() {
     mutationFn: async (pivotName) => {
       const token = await user.getIdToken();
       return api.createPivot(
-        { project_id: selectedProjectId, pivot_name: pivotName },
+        { project_id: selectedProjectId, pivot_name: pivotName, currency },
         token
       );
     },
@@ -183,8 +183,8 @@ export default function PivotPage() {
   });
 
   const diagnoseMutation = useMutation({
-    mutationFn: async ({ projectId, challenges, token }) => {
-      return api.diagnoseProject(projectId, challenges, token);
+    mutationFn: async ({ projectId, challenges, currency, token }) => {
+      return api.diagnoseProject(projectId, challenges, currency, token);
     },
     onSuccess: () => {
       toast.success("Diagnosis complete!");
@@ -243,6 +243,7 @@ export default function PivotPage() {
       diagnoseMutation.mutate({
         projectId,
         challenges: challenges || "General diagnosis",
+        currency,
         token,
       });
     } catch (error) {

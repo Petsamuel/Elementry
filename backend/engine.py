@@ -1,30 +1,36 @@
 import os
 import json
 import asyncio
-import google.generativeai as genai
-from google.api_core.exceptions import ResourceExhausted
+from openai import OpenAI
 from dotenv import load_dotenv
 from models import DeconstructionResult, BusinessElement, PivotAnalysisResult, DiagnosisResult
 import traceback
 
 load_dotenv()
 
-# Configure Gemini
-GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GENAI_API_KEY:
-    genai.configure(api_key=GENAI_API_KEY)
+# Configure OpenRouter
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+YOUR_SITE_URL = os.getenv("YOUR_SITE_URL", "http://localhost:3000") # Optional
+YOUR_SITE_NAME = os.getenv("YOUR_SITE_NAME", "Elementry") # Optional
+
+if OPENROUTER_API_KEY:
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=OPENROUTER_API_KEY,
+    )
 else:
-    print("WARNING: GEMINI_API_KEY not found in environment variables.")
+    print("WARNING: OPENROUTER_API_KEY not found in environment variables.")
+    client = None
+
+MODEL_NAME = "google/gemma-3-27b-it"
 
 async def deconstruct_business_idea(idea: str, currency: str = "USD") -> DeconstructionResult:
     """
-    Deconstructs a business idea using Google Gemini.
+    Deconstructs a business idea using OpenRouter (Gemma 3).
     """
-    if not GENAI_API_KEY:
-        print("WARNING: No GEMINI_API_KEY found. Using mock data.")
+    if not client:
+        print("WARNING: No OPENROUTER_API_KEY found. Using mock data.")
         return _get_mock_data(idea, currency)
-
-    model = genai.GenerativeModel('gemini-2.5-flash')
 
     prompt = f"""
         You are the Elemental Coach, a master business strategist embodying the calm, visionary, practical, and purpose-driven essence of Utibe Okuk. Your voice inspires confidence and discipline through subtle storytelling, light humor, and rock-solid business logic. Imagine guiding an entrepreneur like a wise mentor sharing tales from the trenches—keeping it real, forward-thinking, and actionable, while sprinkling in a dash of wit to lighten the path ahead.
@@ -35,7 +41,8 @@ async def deconstruct_business_idea(idea: str, currency: str = "USD") -> Deconst
         Target Currency: "{currency}"
 
         Guidelines:
-        - Deconstruct into EXACTLY 7 distinct business elements (sub-businesses). Each is a standalone module that could spin off, like chapters in a grand entrepreneurial story.
+It is very important that you generate ideas strictly based on the local context of the selected currency’s country
+     - Deconstruct into EXACTLY 7 distinct business elements (sub-businesses). Each is a standalone module that could spin off, like chapters in a grand entrepreneurial story.
         - Adapt these suggested element types to fit the idea, ensuring diversity: 
           1. Production/Manufacturing (crafting products, physical or digital—like forging the hero's sword),
           2. Content Creation (storytelling through media, blogs, videos—spinning yarns that captivate audiences),
@@ -76,9 +83,24 @@ async def deconstruct_business_idea(idea: str, currency: str = "USD") -> Deconst
 
     for attempt in range(max_retries):
         try:
-            response = await model.generate_content_async(prompt)
-            print(f"DEBUG: Gemini Response for Deconstruction:\n{response.text}")
-            text = response.text.strip()
+            completion = client.chat.completions.create(
+                extra_headers={
+                    "HTTP-Referer": YOUR_SITE_URL,
+                    "X-Title": YOUR_SITE_NAME,
+                },
+                model=MODEL_NAME,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            
+            response_content = completion.choices[0].message.content
+            print(f"DEBUG: OpenRouter Response for Deconstruction:\n{response_content}")
+            text = response_content.strip()
+            
             # Clean up markdown if present
             if text.startswith("```json"):
                 text = text[7:]
@@ -88,20 +110,15 @@ async def deconstruct_business_idea(idea: str, currency: str = "USD") -> Deconst
             data = json.loads(text)
             return DeconstructionResult(**data)
             
-        except ResourceExhausted as e:
-            print(f"WARNING: Gemini quota exceeded (Attempt {attempt + 1}/{max_retries}). Retrying in {base_delay * (2 ** attempt)}s...")
+        except Exception as e:
+            print(f"Error calling OpenRouter (Attempt {attempt + 1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
                 await asyncio.sleep(base_delay * (2 ** attempt))
             else:
-                print("ERROR: Max retries reached for Gemini quota.")
+                print("ERROR: Max retries reached for OpenRouter.")
                 traceback.print_exc()
                 return _get_mock_data(idea, currency)
                 
-        except Exception as e:
-            print(f"Error calling Gemini: {e}")
-            traceback.print_exc()
-            return _get_mock_data(idea, currency)
-            
     return _get_mock_data(idea, currency)
 
 def _get_mock_data(idea: str, currency: str = "USD") -> DeconstructionResult:
@@ -127,13 +144,11 @@ def _get_mock_data(idea: str, currency: str = "USD") -> DeconstructionResult:
 
 async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotAnalysisResult:
     """
-    Generates a detailed analysis for a pivot opportunity using Google Gemini.
+    Generates a detailed analysis for a pivot opportunity using OpenRouter.
     """
-    if not GENAI_API_KEY:
-        print("WARNING: No GEMINI_API_KEY found. Using mock data for pivot.")
+    if not client:
+        print("WARNING: No OPENROUTER_API_KEY found. Using mock data for pivot.")
         return _get_mock_pivot_data(pivot_name)
-
-    model = genai.GenerativeModel('gemini-2.5-flash')
 
     prompt = f"""
         You are the Elemental Coach, channeling the calm, visionary, practical, and purpose-driven spirit of Utibe Okuk. Speak as a mentor who's walked the entrepreneurial path, using storytelling to paint possibilities, humor to ease tensions, and business logic to ground ambitions—inspiring confidence and instilling discipline in every insight.
@@ -144,6 +159,7 @@ async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotA
         Now, analyze this pivot as if guiding a fellow visionary through a crossroads: Provide a detailed execution plan that's realistic yet bold, like mapping a treasure hunt with practical steps and witty warnings.
 
         Guidelines:
+It is very important that you analyze  ideas based on the local context of the selected currency’s country
         - Viability Score: 0-100, based on logical assessment—think of it as your confidence meter in this adventure's success.
         - Market Fit: "High", "Medium-High", "Medium", "Growing", or "Low"—framed with a quick story snippet (but keep it in the string).
         - Market Fit Score: 0-100, tied to data-driven intuition.
@@ -179,9 +195,24 @@ async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotA
 
     for attempt in range(max_retries):
         try:
-            response = await model.generate_content_async(prompt)
-            print(f"DEBUG: Gemini Response for Pivot:\n{response.text}")
-            text = response.text.strip()
+            completion = client.chat.completions.create(
+                extra_headers={
+                    "HTTP-Referer": YOUR_SITE_URL,
+                    "X-Title": YOUR_SITE_NAME,
+                },
+                model=MODEL_NAME,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            
+            response_content = completion.choices[0].message.content
+            print(f"DEBUG: OpenRouter Response for Pivot:\n{response_content}")
+            text = response_content.strip()
+            
             if text.startswith("```json"):
                 text = text[7:]
             if text.endswith("```"):
@@ -190,19 +221,14 @@ async def generate_pivot_analysis(original_idea: str, pivot_name: str) -> PivotA
             data = json.loads(text)
             return PivotAnalysisResult(**data)
             
-        except ResourceExhausted as e:
-            print(f"WARNING: Gemini quota exceeded for pivot (Attempt {attempt + 1}/{max_retries}). Retrying...")
+        except Exception as e:
+            print(f"Error calling OpenRouter for pivot (Attempt {attempt + 1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
                 await asyncio.sleep(base_delay * (2 ** attempt))
             else:
-                print("ERROR: Max retries reached for Gemini pivot quota.")
+                print("ERROR: Max retries reached for OpenRouter pivot.")
                 traceback.print_exc()
                 return _get_mock_pivot_data(pivot_name)
-                
-        except Exception as e:
-            print(f"Error calling Gemini for pivot: {e}")
-            traceback.print_exc()
-            return _get_mock_pivot_data(pivot_name)
 
     return _get_mock_pivot_data(pivot_name)
 
@@ -229,13 +255,11 @@ def _get_mock_pivot_data(pivot_name: str) -> PivotAnalysisResult:
 
 async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
     """
-    Diagnose business challenges using Gemini.
+    Diagnose business challenges using OpenRouter.
     """
-    if not GENAI_API_KEY:
-        print("WARNING: No GEMINI_API_KEY found. Using mock diagnosis.")
+    if not client:
+        print("WARNING: No OPENROUTER_API_KEY found. Using mock diagnosis.")
         return _get_mock_diagnosis_data()
-
-    model = genai.GenerativeModel('gemini-2.5-flash')
 
     prompt = f"""
         You are the Elemental Coach, channeling the calm, visionary, practical, and purpose-driven spirit of Utibe Okuk.
@@ -249,7 +273,8 @@ async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
         - Weak Link: Identify the single most critical bottleneck.
         - Weak Link Detail: Explain WHY this is the weak link in 2-3 sentences, using the Utibe Okuk persona (calm, wise, slightly humorous).
         - Root Cause: What is the underlying issue? (e.g., "Lack of market validation", "Inefficient supply chain").
-        - Immediate Fix: A concrete, actionable step to resolve this NOW.
+	- Also Diagnose ideas based on the local context of the selected currency’s country
+        - Immediate Fix: A concrete, actionable step to resolve this NOW. Mention costs in {currency} if applicable.
         - Strategic Adjustment: A long-term pivot or change to prevent recurrence.
         - Viability Score: 0-100 score of the business's current health.
         
@@ -269,9 +294,24 @@ async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
 
     for attempt in range(max_retries):
         try:
-            response = await model.generate_content_async(prompt)
-            print(f"DEBUG: Gemini Response for Diagnosis:\n{response.text}")
-            text = response.text.strip()
+            completion = client.chat.completions.create(
+                extra_headers={
+                    "HTTP-Referer": YOUR_SITE_URL,
+                    "X-Title": YOUR_SITE_NAME,
+                },
+                model=MODEL_NAME,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            
+            response_content = completion.choices[0].message.content
+            print(f"DEBUG: OpenRouter Response for Diagnosis:\n{response_content}")
+            text = response_content.strip()
+            
             if text.startswith("```json"):
                 text = text[7:]
             if text.endswith("```"):
@@ -280,19 +320,14 @@ async def generate_diagnosis(idea: str, challenges: str) -> DiagnosisResult:
             data = json.loads(text)
             return DiagnosisResult(**data)
             
-        except ResourceExhausted as e:
-            print(f"WARNING: Gemini quota exceeded for diagnosis (Attempt {attempt + 1}/{max_retries}). Retrying...")
+        except Exception as e:
+            print(f"Error calling OpenRouter for diagnosis (Attempt {attempt + 1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
                 await asyncio.sleep(base_delay * (2 ** attempt))
             else:
-                print("ERROR: Max retries reached for Gemini diagnosis quota.")
+                print("ERROR: Max retries reached for OpenRouter diagnosis.")
                 traceback.print_exc()
                 return _get_mock_diagnosis_data()
-                
-        except Exception as e:
-            print(f"Error calling Gemini for diagnosis: {e}")
-            traceback.print_exc()
-            return _get_mock_diagnosis_data()
 
     return _get_mock_diagnosis_data()
 

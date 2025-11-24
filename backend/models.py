@@ -11,7 +11,7 @@ class BusinessElement(BaseModel):
 class DeconstructionRequest(BaseModel):
     idea: str
     industry: Optional[str] = None
-    currency: Optional[str] = "USD"
+    currency: Optional[str] = "NGN"
 
 class DeconstructionResult(BaseModel):
     original_idea: str
@@ -20,7 +20,8 @@ class DeconstructionResult(BaseModel):
     pivot_options: List[str]
     sustainability_tip: str
     project_id: Optional[str] = None
-    currency: Optional[str] = "USD"
+    currency: Optional[str] = "NGN"
+    name: Optional[str] = None
 
 class PivotRequest(BaseModel):
     project_id: str
@@ -31,6 +32,7 @@ class DiagnosisRequest(BaseModel):
     project_id: str
     challenges: str
     current_status: Optional[str] = None
+    currency: Optional[str] = "NGN"
 
 class DiagnosisResult(BaseModel):
     weak_link: str

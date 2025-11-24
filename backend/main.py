@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from models import DeconstructionRequest, DeconstructionResult, PivotRequest, DiagnosisRequest, StrategyRequest, StrategyUpdateRequest
-from engine import deconstruct_business_idea
+from engine import deconstruct_business_idea, generate_diagnosis
 from auth import verify_token, sync_user_to_firestore, check_ai_limit, increment_ai_usage
 from typing import Annotated
 from middleware import RateLimiter
@@ -200,6 +200,44 @@ async def update_project_currency_endpoint(project_id: str, currency_data: dict,
         del project_cache[cache_key]
         
     return {"success": success}
+
+@app.post("/projects/{project_id}/diagnose", response_model=DiagnosisResult, dependencies=[Depends(rate_limiter)])
+async def diagnose_project_endpoint(
+    project_id: str,
+    request: DiagnosisRequest,
+    token_data: dict = Depends(get_token)
+):
+    """Run AI diagnosis on a project"""
+    from firestore_utils import get_project
+    
+    # 1. Get project context
+    uid = token_data['uid']
+    cache_key = (uid, project_id)
+    project = None
+    
+    if cache_key in project_cache:
+        data, timestamp = project_cache[cache_key]
+        if time.time() - timestamp < CACHE_TTL:
+            project = data
+            
+    if not project:
+        project = get_project(uid, project_id)
+        if project:
+            project_cache[cache_key] = (project, time.time())
+            
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+        
+    # 2. Run diagnosis
+    # Use project name/description as the idea
+    idea = project.get('name', 'Business Project')
+    
+    # Use currency from request or project or default
+    currency = request.currency or project.get('currency', 'NGN')
+    
+    result = await generate_diagnosis(idea, request.challenges)
+    
+    return result
 
 @app.get("/dashboard/overview")
 async def get_dashboard_overview(token_data: dict = Depends(get_token)):

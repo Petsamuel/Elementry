@@ -23,6 +23,7 @@ import {
   MoreVertical,
   LayoutGrid,
   List as ListIcon,
+  X,
 } from "lucide-react";
 
 export default function ResourcesPage() {
@@ -30,6 +31,7 @@ export default function ResourcesPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
+  const [selectedResource, setSelectedResource] = useState(null);
 
   const { data: projectData, isLoading } = useQuery({
     queryKey: ["project", selectedProjectId],
@@ -91,7 +93,6 @@ export default function ResourcesPage() {
             {projectData.name}
           </h1>
         </div>
-       
       </div>
 
       {/* Controls Section */}
@@ -170,7 +171,8 @@ export default function ResourcesPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2, delay: index * 0.05 }}
-                className={`group relative bg-card-bg border border-white/10 rounded-2xl overflow-hidden hover:border-accent/30 transition-all hover:shadow-xl hover:shadow-accent/5 ${
+                onClick={() => setSelectedResource(resource)}
+                className={`group relative bg-card-bg border border-white/10 rounded-2xl overflow-hidden hover:border-accent/30 transition-all hover:shadow-xl hover:shadow-accent/5 cursor-pointer ${
                   viewMode === "list" ? "flex items-center p-4 gap-6" : "p-6"
                 }`}
               >
@@ -281,6 +283,102 @@ export default function ResourcesPage() {
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* Resource Detail Modal */}
+      <AnimatePresence>
+        {selectedResource && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedResource(null)}
+              className="absolute inset-0"
+            />
+            <motion.div
+              layoutId={`resource-${selectedResource.name}`} // Use a unique ID if available, name fallback
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-obsidian border border-white/10 rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-accent via-primary to-accent" />
+              <button
+                onClick={() => setSelectedResource(null)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors z-20"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-4 rounded-xl bg-accent/10 border border-accent/20">
+                    <Box className="w-8 h-8 text-accent" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      {selectedResource.name}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-primary font-mono text-xs uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                        {selectedResource.type || "Resource"}
+                      </span>
+                      {selectedResource.category && (
+                        <span className="text-gray-400 font-mono text-xs uppercase tracking-wider bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                          {selectedResource.category}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="bg-white/5 rounded-xl p-6 border border-white/5">
+                    <h3 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wide">
+                      Description
+                    </h3>
+                    <p className="text-lg text-white leading-relaxed">
+                      {selectedResource.description ||
+                        "No detailed description available."}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                      <h3 className="text-xs font-bold text-gray-400 mb-1 uppercase">
+                        Monetization Potential
+                      </h3>
+                      <p className="text-xl font-bold text-accent">
+                        {selectedResource.monetization_potential || "N/A"}
+                      </p>
+                    </div>
+
+                    {selectedResource.complexity && (
+                      <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                        <h3 className="text-xs font-bold text-gray-400 mb-1 uppercase">
+                          Complexity
+                        </h3>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <div
+                              key={i}
+                              className={`w-2 h-6 rounded-full transition-colors ${
+                                i < selectedResource.complexity
+                                  ? "bg-primary shadow-[0_0_5px_var(--color-accent)]"
+                                  : "bg-white/10"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
