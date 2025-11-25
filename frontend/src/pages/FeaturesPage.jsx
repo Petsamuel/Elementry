@@ -1,12 +1,13 @@
 import { motion } from "motion/react";
 import {
-  Zap,
-  Shield,
-  Smartphone,
-  Globe,
-  BarChart,
-  Cpu,
+  Layers,
+  GitBranch,
+  Target,
+  MessageSquare,
+  Map,
+  Brain,
   ArrowRight,
+  CheckCircle2,
 } from "lucide-react";
 import TiltCard from "../components/TiltCard";
 import ParticleBackground from "../components/ParticleBackground";
@@ -14,40 +15,40 @@ import ParticleBackground from "../components/ParticleBackground";
 export default function FeaturesPage() {
   const features = [
     {
-      icon: Zap,
-      title: "Lightning Fast",
-      desc: "Optimized for speed with zero-latency edge deployment.",
-      color: "text-accent",
-    },
-    {
-      icon: Shield,
-      title: "Enterprise Security",
-      desc: "Bank-grade encryption and SOC2 compliance out of the box.",
+      icon: Layers,
+      title: "Deconstruction Engine",
+      desc: "Break any idea into 7 actionable sub-businesses using the Elemental Business Model.",
       color: "text-blue-400",
     },
     {
-      icon: Smartphone,
-      title: "Mobile First",
-      desc: "Responsive design that works perfectly on any device.",
-      color: "text-pink-400",
-    },
-    {
-      icon: Globe,
-      title: "Global Scale",
-      desc: "Deploy to 35+ regions automatically with a single click.",
-      color: "text-green-400",
-    },
-    {
-      icon: BarChart,
-      title: "Real-time Analytics",
-      desc: "Track every metric that matters with live dashboards.",
+      icon: GitBranch,
+      title: "Pivot & Fix Module",
+      desc: "Diagnose weak links and find 7 adjacent pivot opportunities for recovery.",
       color: "text-purple-400",
     },
     {
-      icon: Cpu,
-      title: "AI Powered",
-      desc: "Built-in generative AI capabilities for next-gen apps.",
+      icon: Target,
+      title: "Cheapest Point Engine",
+      desc: "Identify the single least-cost, high-impact entry point to start immediately.",
+      color: "text-green-400",
+    },
+    {
+      icon: MessageSquare,
+      title: "Elemental Coach",
+      desc: "Guidance with the wisdom, tone, and practical logic of Utibe Okuk.",
       color: "text-orange-400",
+    },
+    {
+      icon: Map,
+      title: "Sustainability Blueprint",
+      desc: "Generate roadmaps for gradual funding and community expansion.",
+      color: "text-cyan-400",
+    },
+    {
+      icon: Brain,
+      title: "Growth Intelligence",
+      desc: "AI that thinks like a builder, turning limitations into strategic advantages.",
+      color: "text-accent",
     },
   ];
 
@@ -56,28 +57,31 @@ export default function FeaturesPage() {
       <ParticleBackground />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-20 space-y-6">
+        {/* Hero Section */}
+        <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-7xl font-black text-text dark:text-white tracking-tight"
           >
-            Everything you need to <br />
+            The Intelligence of <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-primary">
-              Scale Faster
+              Gradual Growth
             </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-text-muted"
+            className="text-xl text-text-muted leading-relaxed"
           >
-            A complete toolkit for modern founders. Stop reinventing the wheel
-            and start building your empire.
+            Start where you are, grow element by element. A complete toolkit to
+            deconstruct, pivot, and scale your business using the Elemental
+            Business Model.
           </motion.p>
         </div>
 
+        {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((f, i) => (
             <motion.div
@@ -86,9 +90,9 @@ export default function FeaturesPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 + 0.2 }}
             >
-              <TiltCard className="glass-card p-8 h-full hover:bg-white/10 transition-colors group">
+              <TiltCard className="glass-card p-8 h-full hover:bg-white/10 transition-colors group border border-white/5">
                 <div
-                  className={`w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center mb-6 ${f.color} group-hover:scale-110 transition-transform duration-300`}
+                  className={`w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center mb-6 ${f.color} group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-white/5`}
                 >
                   <f.icon size={28} />
                 </div>
@@ -101,45 +105,89 @@ export default function FeaturesPage() {
           ))}
         </div>
 
-        {/* Feature Deep Dive */}
-        <div className="mt-32 space-y-32">
+        {/* Deep Dive Sections */}
+        <div className="mt-40 space-y-40">
           {[
             {
-              title: "Global Infrastructure",
-              desc: "Don't worry about servers. We handle the complexity of distributed systems so you can focus on your product.",
+              title: "Business Deconstruction",
+              subtitle: "Don't just build a business. Build an ecosystem.",
+              desc: "Our engine takes your core idea and explodes it into 7 distinct revenue streams—from production to content monetization. See the hidden value chains you're missing.",
+              points: [
+                "Identify 7 sub-businesses instantly",
+                "Uncover hidden revenue streams",
+                "Map out your entire value chain",
+              ],
               image: "bg-gradient-to-br from-blue-600/20 to-purple-600/20",
+              icon: Layers,
             },
             {
-              title: "Advanced Security",
-              desc: "Sleep soundly knowing your data is protected by state-of-the-art encryption and security protocols.",
+              title: "The Cheapest Point Strategy",
+              subtitle: "Start Small, Start Smart.",
+              desc: "Why risk everything? We identify the single most effective entry point that requires the least capital but offers the highest validation. Turn your limitations into a strategy.",
+              points: [
+                "Find your lowest barrier to entry",
+                "Validate before you scale",
+                "Minimize financial risk",
+              ],
               image: "bg-gradient-to-br from-green-600/20 to-emerald-600/20",
               reverse: true,
+              icon: Target,
+            },
+            {
+              title: "Strategic Pivoting",
+              subtitle: "Stuck? Reinvent your trajectory.",
+              desc: "We don't just tell you to 'work harder'. We analyze your supply, sales, and strategy to reveal 7 concrete pivot options. Turn a dead end into a new beginning.",
+              points: [
+                "Diagnose critical weak links",
+                "Discover adjacent market opportunities",
+                "Generate a step-by-step recovery plan",
+              ],
+              image: "bg-gradient-to-br from-orange-600/20 to-red-600/20",
+              icon: GitBranch,
             },
           ].map((section, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className={`flex flex-col md:flex-row items-center gap-16 ${
-                section.reverse ? "md:flex-row-reverse" : ""
+              viewport={{ once: true, margin: "-100px" }}
+              className={`flex flex-col lg:flex-row items-center gap-20 ${
+                section.reverse ? "lg:flex-row-reverse" : ""
               }`}
             >
               <div className="flex-1 space-y-8">
-                <h2 className="text-4xl md:text-5xl font-bold text-text dark:text-white">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-accent text-sm font-bold uppercase tracking-wider">
+                  <section.icon size={16} />
                   {section.title}
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-text dark:text-white leading-tight">
+                  {section.subtitle}
                 </h2>
                 <p className="text-xl text-text-muted leading-relaxed">
                   {section.desc}
                 </p>
-                <button className="group flex items-center gap-2 text-accent font-bold uppercase tracking-wider hover:gap-4 transition-all">
-                  Learn more <ArrowRight size={20} />
-                </button>
+                <ul className="space-y-4">
+                  {section.points.map((point, j) => (
+                    <li
+                      key={j}
+                      className="flex items-center gap-3 text-gray-300"
+                    >
+                      <CheckCircle2 className="text-accent w-5 h-5" />
+                      {point}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="flex-1 w-full aspect-video rounded-2xl overflow-hidden glass-panel p-2">
+              <div className="flex-1 w-full aspect-square lg:aspect-video rounded-3xl overflow-hidden glass-panel p-2 relative group">
+                <div className="absolute inset-0 bg-accent/5 blur-3xl group-hover:bg-accent/10 transition-colors duration-700" />
                 <div
-                  className={`w-full h-full rounded-xl ${section.image} border border-white/10`}
-                />
+                  className={`w-full h-full rounded-2xl ${section.image} border border-white/10 relative overflow-hidden`}
+                >
+                  {/* Abstract Visuals Placeholder */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                    <section.icon size={120} className="text-white" />
+                  </div>
+                </div>
               </div>
             </motion.div>
           ))}
