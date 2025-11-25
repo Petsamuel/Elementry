@@ -538,3 +538,198 @@ export const StrategyDetailView = ({
     </Dialog.Root>
   );
 };
+// --- Diagnosis Result View (New) ---
+export const DiagnosisResultView = ({ diagnosis }) => {
+  if (!diagnosis) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="relative overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/10 p-1"
+    >
+      {/* Header / Top Secret Stamp */}
+      <div className="absolute top-0 right-0 p-4 opacity-50 pointer-events-none">
+        <div className="border-4 border-red-500/20 text-red-500/20 font-black text-4xl uppercase -rotate-12 px-4 py-2 tracking-widest">
+          Confidential
+        </div>
+      </div>
+
+      <div className="bg-obsidian rounded-[20px] p-8 relative z-10 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-accent to-transparent opacity-50" />
+
+        <div className="flex items-center gap-4 mb-8">
+          <div className="p-3 rounded-xl bg-accent/10 border border-accent/20 text-accent shadow-[0_0_20px_-5px_rgba(200,255,22,0.3)]">
+            <Activity className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-black text-white tracking-tight uppercase">
+              Strategic Diagnosis Report
+            </h3>
+            <div className="flex items-center gap-2 text-xs font-mono text-gray-500">
+              <span>
+                ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
+              </span>
+              <span>•</span>
+              <span>{new Date().toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Left Column: Critical Issues */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Weak Link */}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="p-6 rounded-2xl bg-red-500/5 border border-red-500/20 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-3">
+                  <AlertTriangle className="w-5 h-5 text-red-500" />
+                  <span className="text-xs font-bold text-red-500 uppercase tracking-widest">
+                    Critical Weak Link
+                  </span>
+                </div>
+                <h4 className="text-xl font-bold text-white mb-2">
+                  {diagnosis.weak_link}
+                </h4>
+                <p className="text-gray-400 leading-relaxed text-sm">
+                  {diagnosis.weak_link_detail}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Root Cause */}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="p-6 rounded-2xl bg-blue-500/5 border border-blue-500/20 relative overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Target className="w-5 h-5 text-blue-400" />
+                <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">
+                  Root Cause Analysis
+                </span>
+              </div>
+              <h4 className="text-lg font-bold text-white mb-2">
+                {diagnosis.root_cause}
+              </h4>
+            </motion.div>
+
+            {/* Strategic Adjustment */}
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="p-6 rounded-2xl bg-purple-500/5 border border-purple-500/20"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <GitBranch className="w-5 h-5 text-purple-400" />
+                <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                  Strategic Pivot
+                </span>
+              </div>
+              <p className="text-gray-300 leading-relaxed">
+                {diagnosis.strategic_adjustment}
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Right Column: Action & Score */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Viability Score */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-white/5 to-transparent pointer-events-none" />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 block">
+                Current Viability Score
+              </span>
+              <div className="relative inline-flex items-center justify-center">
+                <svg className="w-32 h-32 transform -rotate-90">
+                  <circle
+                    className="text-white/10"
+                    strokeWidth="8"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="58"
+                    cx="64"
+                    cy="64"
+                  />
+                  <motion.circle
+                    className={
+                      diagnosis.viability_score > 70
+                        ? "text-green-500"
+                        : diagnosis.viability_score > 40
+                        ? "text-yellow-500"
+                        : "text-red-500"
+                    }
+                    strokeWidth="8"
+                    strokeDasharray={365}
+                    strokeDashoffset={
+                      365 - (365 * diagnosis.viability_score) / 100
+                    }
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="58"
+                    cx="64"
+                    cy="64"
+                    initial={{ strokeDashoffset: 365 }}
+                    animate={{
+                      strokeDashoffset:
+                        365 - (365 * diagnosis.viability_score) / 100,
+                    }}
+                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.8 }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-4xl font-black text-white">
+                    {diagnosis.viability_score}
+                  </span>
+                  <span className="text-[10px] text-gray-500 uppercase">
+                    / 100
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Immediate Fix */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="p-6 rounded-2xl bg-accent/10 border border-accent/20 h-full"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <Zap className="w-5 h-5 text-accent" />
+                <span className="text-xs font-bold text-accent uppercase tracking-widest">
+                  Tactical Fix
+                </span>
+              </div>
+              <p className="text-white font-medium leading-relaxed">
+                {diagnosis.immediate_fix}
+              </p>
+
+              <div className="mt-6 pt-6 border-t border-accent/20">
+                <button className="w-full py-3 rounded-xl bg-accent text-black font-bold text-sm hover:bg-accent/90 transition-colors flex items-center justify-center gap-2">
+                  <PlayCircle className="w-4 h-4" />
+                  Execute Fix Protocol
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};

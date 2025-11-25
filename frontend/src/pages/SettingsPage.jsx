@@ -219,8 +219,8 @@ export default function SettingsPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Upload className="w-6 h-6 text-white" />
+              <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                {/* <Upload className="w-6 h-6 text-white" /> */}
               </div>
             </div>
             <div className="space-y-1">

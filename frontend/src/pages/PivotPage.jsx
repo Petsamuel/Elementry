@@ -492,6 +492,13 @@ export default function PivotPage() {
                 </div>
               </Card>
 
+              {/* Diagnosis Result View */}
+              <AnimatePresence>
+                {projectData?.diagnosis && (
+                  <DiagnosisResultView diagnosis={projectData.diagnosis} />
+                )}
+              </AnimatePresence>
+
               {/* Pipeline Summary Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {[

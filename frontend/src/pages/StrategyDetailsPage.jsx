@@ -166,6 +166,8 @@ export default function StrategyDetailsPage() {
     },
   });
 
+  const [diagnosisResult, setDiagnosisResult] = useState(null);
+
   const runDiagnosis = () => {
     const issues = [];
 
@@ -186,21 +188,13 @@ export default function StrategyDetailsPage() {
     if (!timeline || timeline.length === 0)
       issues.push("Execution timeline is empty");
 
-    if (issues.length > 0) {
-      toast.error(
-        <div>
-          <p className="font-bold mb-1">
-            Diagnosis: {issues.length} issues found
-          </p>
-          <ul className="list-disc pl-4 text-sm">
-            {issues.map((issue, i) => (
-              <li key={i}>{issue}</li>
-            ))}
-          </ul>
-        </div>,
-        { duration: 5000 }
-      );
-    } else {
+    setDiagnosisResult({
+      success: issues.length === 0,
+      issues: issues,
+      timestamp: new Date().toISOString(),
+    });
+
+    if (issues.length === 0) {
       toast.success("Diagnosis complete: Strategy is well-defined!");
     }
   };
@@ -334,6 +328,50 @@ export default function StrategyDetailsPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Diagnosis Alert */}
+      <AnimatePresence>
+        {diagnosisResult && !diagnosisResult.success && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -20, height: 0 }}
+            className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 overflow-hidden"
+          >
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-xl bg-red-500/20 text-red-400">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div className="space-y-2 flex-1">
+                <h3 className="text-lg font-bold text-white">
+                  Diagnosis: {diagnosisResult.issues.length} Issues Found
+                </h3>
+                <p className="text-gray-400">
+                  The following sections need attention to improve your
+                  strategy's viability score:
+                </p>
+                <div className="grid md:grid-cols-2 gap-2 mt-2">
+                  {diagnosisResult.issues.map((issue, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 text-sm text-red-300 bg-red-500/5 px-3 py-2 rounded-lg border border-red-500/10"
+                    >
+                      <X className="w-4 h-4 shrink-0" />
+                      {issue}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={() => setDiagnosisResult(null)}
+                className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
