@@ -13,6 +13,16 @@ class DeconstructionRequest(BaseModel):
     industry: Optional[str] = None
     currency: Optional[str] = "NGN"
 
+class FundingStep(BaseModel):
+    step: str
+    amount: str
+    description: str
+
+class SustainabilityMilestone(BaseModel):
+    milestone: str
+    timeline: str
+    description: str
+
 class DeconstructionResult(BaseModel):
     original_idea: str
     cheapest_entry_point: str
@@ -21,9 +31,13 @@ class DeconstructionResult(BaseModel):
     elements: List[BusinessElement]  # Should be exactly 7
     pivot_options: List[str]
     sustainability_tip: str
+    gradual_funding_strategy: List[FundingStep]
+    brand_and_community_expansion_tips: List[str]
+    sustainability_roadmap: List[SustainabilityMilestone]
     project_id: Optional[str] = None
     currency: Optional[str] = "NGN"
     name: Optional[str] = None
+    overall_score: Optional[int] = None
 
 class PivotRequest(BaseModel):
     project_id: str

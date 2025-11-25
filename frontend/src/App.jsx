@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardOverview from "./pages/DashboardOverview";
 import DeconstructPage from "./pages/DeconstructPage";
 import PivotPage from "./pages/PivotPage";
+import StrategyDetailsPage from "./pages/StrategyDetailsPage";
 import CheapestPointPage from "./pages/CheapestPointPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import SavedProjectsPage from "./pages/SavedProjectsPage";
@@ -134,6 +135,7 @@ function AppContent() {
             {currentPage === "dashboard" && <DashboardOverview />}
             {currentPage === "deconstruct" && <DeconstructPage />}
             {currentPage === "pivot" && <PivotPage />}
+            {currentPage === "strategy-details" && <StrategyDetailsPage />}
             {currentPage === "cheapest" && <CheapestPointPage />}
             {currentPage === "resources" && <ResourcesPage />}
             {currentPage === "saved" && <SavedProjectsPage />}

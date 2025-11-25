@@ -420,13 +420,13 @@ export default function DeconstructPage() {
                     >
                       Blueprint
                     </TabButton>
-                    {/* <TabButton
-                      active={activeTab === "expansion"}
-                      onClick={() => setActiveTab("expansion")}
+                    <TabButton
+                      active={activeTab === "growth"}
+                      onClick={() => setActiveTab("growth")}
                       icon={TrendingUp}
                     >
-                      Expansion
-                    </TabButton> */}
+                      Growth
+                    </TabButton>
                   </div>
                 </LayoutGroup>
               </div>
@@ -511,155 +511,339 @@ export default function DeconstructPage() {
           >
             {/* OVERVIEW TAB */}
             {activeTab === "overview" && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-auto">
-                {/* Revenue Distribution */}
-                <Card className="lg:col-span-1 lg:row-span-2 p-6 relative group">
-                  <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Score Card - Enhanced with glow */}
+                <Card className="lg:col-span-1 lg:row-span-1 p-6 relative overflow-hidden group border-accent/20 bg-obsidian/80 backdrop-blur-xl">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(200,255,22,0.15),transparent_70%)] opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+                  <div className="relative z-10 flex flex-col items-center justify-center h-full text-center">
+                    <div className="relative w-48 h-48 mb-8">
+                      {/* Outer Glow Ring */}
+                      <div className="absolute inset-0 rounded-full bg-accent/5 blur-xl animate-pulse" />
+
+                      <svg className="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(200,255,22,0.3)]">
+                        <defs>
+                          <linearGradient
+                            id="scoreGradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                          >
+                            <stop offset="0%" stopColor="#c8ff16" />
+                            <stop offset="100%" stopColor="#80ff00" />
+                          </linearGradient>
+                        </defs>
+                        {/* Background Track */}
+                        <circle
+                          cx="96"
+                          cy="96"
+                          r="80"
+                          stroke="rgba(255,255,255,0.05)"
+                          strokeWidth="8"
+                          fill="none"
+                        />
+                        {/* Progress Arc */}
+                        <motion.circle
+                          cx="96"
+                          cy="96"
+                          r="80"
+                          stroke="url(#scoreGradient)"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeLinecap="round"
+                          initial={{ strokeDasharray: "0 502" }}
+                          animate={{
+                            strokeDasharray: `${
+                              ((results.overall_score || 0) / 100) * 502
+                            } 502`,
+                          }}
+                          transition={{
+                            duration: 2,
+                            ease: "easeOut",
+                            delay: 0.3,
+                          }}
+                        />
+                      </svg>
+
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <motion.span
+                          className="text-7xl font-black text-white tracking-tighter"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{
+                            duration: 0.5,
+                            delay: 0.5,
+                            type: "spring",
+                          }}
+                        >
+                          {results.overall_score || 0}
+                        </motion.span>
+                        <span className="text-xs text-accent font-bold uppercase tracking-widest mt-1">
+                          Viability
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                        <Activity className="w-5 h-5 text-accent" />
+                        Project Health
+                      </h3>
+                      <p className="text-sm text-gray-400 leading-relaxed max-w-[200px] mx-auto">
+                        AI-calculated score based on market fit, monetization,
+                        and scalability.
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Revenue Mix - Enhanced */}
+                <Card className="lg:col-span-2 p-6 relative overflow-hidden group bg-obsidian/80 backdrop-blur-xl">
+                  <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(89,65,255,0.1),transparent_60%)] opacity-50" />
+
                   <div className="relative z-10 h-full flex flex-col">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                          <PieChart className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-white text-lg">
+                            Revenue Distribution
+                          </h3>
+                          <p className="text-xs text-text-muted font-mono uppercase">
+                            Monetization Analysis
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 flex items-center gap-8">
+                      <div className="flex-1 h-[220px] relative">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RechartsPie>
+                            <Pie
+                              data={monetizationData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={90}
+                              paddingAngle={4}
+                              dataKey="value"
+                              stroke="none"
+                              cornerRadius={4}
+                            >
+                              {monetizationData.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={COLORS[entry.name] || COLORS.unknown}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "rgba(10,10,10,0.9)",
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                borderRadius: "12px",
+                                backdropFilter: "blur(10px)",
+                                boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)",
+                              }}
+                              itemStyle={{ color: "#fff", fontWeight: 600 }}
+                            />
+                          </RechartsPie>
+                        </ResponsiveContainer>
+                        {/* Center Text */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="text-center">
+                            <span className="block text-2xl font-bold text-white">
+                              {results.elements?.length || 0}
+                            </span>
+                            <span className="text-[10px] text-gray-500 uppercase">
+                              Streams
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 space-y-3 pr-4">
+                        {monetizationData.map((entry, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.1 }}
+                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-all border border-transparent hover:border-white/5"
+                          >
+                            <div
+                              className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_currentColor]"
+                              style={{
+                                color: COLORS[entry.name] || COLORS.unknown,
+                                backgroundColor: "currentColor",
+                              }}
+                            />
+                            <span className="text-sm text-gray-300 capitalize flex-1 font-medium">
+                              {entry.name}
+                            </span>
+                            <span className="text-sm text-white font-bold font-mono bg-white/5 px-2 py-0.5 rounded">
+                              {Math.round(
+                                (entry.value / results.elements.length) * 100
+                              )}
+                              %
+                            </span>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Quick Stats - Enhanced */}
+                <Card className="lg:col-span-1 p-6 space-y-4 relative overflow-hidden group bg-obsidian/80 backdrop-blur-xl">
+                  <div className="absolute inset-0 bg-linear-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="relative z-10 space-y-4 h-full flex flex-col justify-center">
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-accent/20 transition-all group/stat hover:bg-white/10">
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <DollarSign className="w-3.5 h-3.5" /> Est. Cost
+                        </span>
+                        <ArrowRight className="w-3 h-3 opacity-0 group-hover/stat:opacity-100 -translate-x-2 group-hover/stat:translate-x-0 transition-all" />
+                      </div>
+                      <div className="text-3xl font-black text-white tracking-tight">
+                        {results.estimated_cost}
+                      </div>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group/stat hover:bg-white/10">
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <Zap className="w-3.5 h-3.5" /> Validation Time
+                        </span>
+                        <ArrowRight className="w-3 h-3 opacity-0 group-hover/stat:opacity-100 -translate-x-2 group-hover/stat:translate-x-0 transition-all" />
+                      </div>
+                      <div className="text-3xl font-black text-white tracking-tight">
+                        {results.time_to_validate}
+                      </div>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-accent/20 transition-all group/stat hover:bg-white/10">
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">
+                        Currency
+                      </div>
+                      <div className="text-3xl font-black text-accent tracking-tight">
+                        {results.currency}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Entry Point Strategy - Enhanced */}
+                <Card className="lg:col-span-2 p-8 relative overflow-hidden border-accent/20">
+                  <div className="absolute top-0 right-0 p-40 bg-accent/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 p-32 bg-primary/5 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
+
+                  <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                        <PieChart className="w-5 h-5 text-primary" />
+                      <div className="p-2.5 rounded-xl bg-accent/10 border border-accent/20 text-accent shadow-[0_0_15px_rgba(200,255,22,0.15)]">
+                        <Rocket className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-white">Revenue Mix</h3>
-                        <p className="text-xs text-text-muted font-mono">
-                          POTENTIAL_DISTRIBUTION
+                        <h3 className="font-bold text-white text-lg">
+                          Go-To-Market Strategy
+                        </h3>
+                        <p className="text-xs text-text-muted font-mono uppercase">
+                          Recommended First Step
                         </p>
                       </div>
                     </div>
-                    <div className="flex-1 min-h-[200px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RechartsPie>
-                          <Pie
-                            data={monetizationData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                            stroke="none"
-                          >
-                            {monetizationData.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[entry.name] || COLORS.unknown}
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: "#0a0a0a",
-                              border: "1px solid rgba(255,255,255,0.1)",
-                              borderRadius: "8px",
-                            }}
-                            itemStyle={{ color: "#fff" }}
-                          />
-                        </RechartsPie>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </Card>
 
-                {/* Cheapest Entry */}
-                <Card
-                  delay={0.1}
-                  className="lg:col-span-2 p-6 relative group overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-linear-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start">
-                    <div className="p-4 rounded-2xl bg-accent/10 border border-accent/20 group-hover:scale-110 transition-transform duration-300">
-                      <Rocket className="lg:w-8 lg:h-8 w-6 h-6 text-accent" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-1">
-                        Recommended Entry Point
-                      </h3>
-                      <p className="text-xs text-accent font-mono mb-3">
-                        MINIMUM_VIABLE_SEGMENT
-                      </p>
-                      <p className="text-gray-300 leading-relaxed lg:text-lg text-[14.5px]">
+                    <div className="bg-white/5 rounded-2xl p-6 border border-white/5 mb-6 backdrop-blur-sm relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent" />
+                      <p className="text-gray-200 leading-relaxed text-lg font-medium">
                         {results.cheapest_entry_point}
                       </p>
                     </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                        <Zap className="w-3 h-3 text-accent" />
+                        HIGH_IMPACT
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                        <DollarSign className="w-3 h-3 text-green-400" />
+                        LOW_COST
+                      </div>
+                    </div>
                   </div>
                 </Card>
 
-                {/* Element Comparison */}
-                <Card delay={0.2} className="lg:col-span-2 lg:row-span-2 p-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                      <BarChart3 className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-white">
-                        Component Analysis
-                      </h3>
-                      <p className="text-xs text-text-muted font-mono">
-                        VIABILITY_INDEX
-                      </p>
+                {/* Component Analysis Chart - Enhanced */}
+                <Card className="lg:col-span-2 p-6 bg-obsidian/80 backdrop-blur-xl">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-400">
+                        <BarChart3 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-white text-lg">
+                          Component Viability
+                        </h3>
+                        <p className="text-xs text-text-muted font-mono uppercase">
+                          Strength Analysis
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="h-[250px] w-full">
+
+                  <div className="h-[220px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={barChartData}>
+                      <BarChart
+                        data={barChartData}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                      >
                         <XAxis
                           dataKey="name"
                           stroke="#6b7280"
                           fontSize={10}
                           tickLine={false}
                           axisLine={false}
+                          dy={10}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(value) => `${value}`}
                         />
                         <Tooltip
-                          cursor={{ fill: "rgba(255,255,255,0.05)" }}
+                          cursor={{ fill: "rgba(255,255,255,0.03)", radius: 4 }}
                           contentStyle={{
-                            backgroundColor: "#0a0a0a",
+                            backgroundColor: "rgba(10,10,10,0.9)",
                             border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: "8px",
+                            borderRadius: "12px",
+                            backdropFilter: "blur(10px)",
+                            boxShadow: "0 10px 40px -10px rgba(0,0,0,0.5)",
                           }}
+                          itemStyle={{ color: "#fff" }}
                         />
-                        <Bar
-                          dataKey="score"
-                          fill="#5941ff"
-                          radius={[4, 4, 0, 0]}
-                        >
+                        <Bar dataKey="score" radius={[6, 6, 6, 6]} barSize={32}>
                           {barChartData.map((entry, index) => (
                             <Cell
                               key={`cell-${index}`}
                               fill={
                                 entry.score >= 80
-                                  ? "#c8ff16"
+                                  ? "url(#scoreGradient)" // Use gradient if possible, or fallback color
                                   : entry.score >= 50
                                   ? "#5941ff"
                                   : "#374151"
                               }
+                              strokeWidth={0}
                             />
                           ))}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
-                  </div>
-                </Card>
-
-                {/* Overall Score */}
-                <Card
-                  delay={0.3}
-                  className="p-6 flex flex-col items-center justify-center text-center relative group"
-                >
-                  <div className="absolute inset-0 bg-[radial-linear(circle_at_center,rgba(200,255,22,0.1),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="relative z-10">
-                    <div className="p-4 rounded-full bg-white/5 border border-white/10 mb-4 mx-auto group-hover:border-accent/30 transition-all duration-500 flex justify-center items-center">
-                      <Award className="w-6 h-6 text-white group-hover:text-accent transition-colors" />
-                    </div>
-                    <h3 className="font-bold text-white mb-1">Total Score</h3>
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-6xl font-black text-white group-hover:text-accent transition-colors">
-                        {results.overall_score || 0}
-                      </span>
-                      <span className="text-text-muted text-xl font-mono">
-                        /100
-                      </span>
-                    </div>
                   </div>
                 </Card>
               </div>
@@ -810,58 +994,152 @@ export default function DeconstructPage() {
               </div>
             )}
 
-            {/* EXPANSION TAB */}
-            {activeTab === "expansion" && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-accent/10 border border-accent/20">
-                    <Zap className="w-6 h-6 text-accent" />
-                  </div>
-                  <div>
+            {/* GROWTH TAB */}
+            {activeTab === "growth" && (
+              <div className="space-y-8">
+                {/* Funding Strategy */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                      <DollarSign className="w-6 h-6 text-green-500" />
+                    </div>
                     <h2 className="text-2xl font-bold text-white">
-                      Pivot Opportunities
+                      Gradual Funding Strategy
                     </h2>
-                    <p className="text-text-muted text-sm font-mono">
-                      ADJACENT_MARKET_VECTORS
-                    </p>
+                  </div>
+                  <div className="grid gap-4">
+                    {results.gradual_funding_strategy?.map((step, index) => (
+                      <Card
+                        key={index}
+                        className="p-6 relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 left-0 w-1 h-full bg-green-500" />
+                        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                          <div>
+                            <h3 className="text-lg font-bold text-white mb-1">
+                              {step.step}
+                            </h3>
+                            <p className="text-gray-400 text-sm">
+                              {step.description}
+                            </p>
+                          </div>
+                          <Badge className="bg-green-500/10 text-green-400 border-green-500/20 whitespace-nowrap">
+                            {step.amount}
+                          </Badge>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {results.pivot_options?.map((pivot, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="group p-6 rounded-xl bg-obsidian border border-white/5 hover:border-accent/30 transition-all relative overflow-hidden"
-                    >
-                      <div className="absolute inset-0 bg-linear-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                      <div className="relative z-10 flex flex-col h-full">
-                        <div className="flex items-start gap-4 mb-4">
-                          <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-accent group-hover:bg-accent/10 transition-colors">
-                            <TrendingUp className="w-5 h-5" />
+                {/* Expansion Tips */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-accent/10 border border-accent/20">
+                      <Megaphone className="w-6 h-6 text-accent" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Brand & Community Expansion
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {results.brand_and_community_expansion_tips?.map(
+                      (tip, index) => (
+                        <Card key={index} className="p-6">
+                          <div className="flex gap-4">
+                            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent font-bold shrink-0">
+                              {index + 1}
+                            </div>
+                            <p className="text-gray-300">{tip}</p>
                           </div>
-                          <h3 className="text-lg font-bold text-white group-hover:text-accent transition-colors">
-                            Vector 0{index + 1}
+                        </Card>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Sustainability Roadmap */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                      <Globe className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Sustainability Roadmap
+                    </h2>
+                  </div>
+                  <div className="relative border-l-2 border-white/10 ml-4 space-y-8 py-4">
+                    {results.sustainability_roadmap?.map((milestone, index) => (
+                      <div key={index} className="relative pl-8">
+                        <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-obsidian border-2 border-blue-500" />
+                        <div className="space-y-1">
+                          <span className="text-xs font-mono text-blue-400 uppercase tracking-wider">
+                            {milestone.timeline}
+                          </span>
+                          <h3 className="text-lg font-bold text-white">
+                            {milestone.milestone}
                           </h3>
+                          <p className="text-gray-400 text-sm">
+                            {milestone.description}
+                          </p>
                         </div>
-
-                        <p className="text-gray-400 mb-6 flex-1 leading-relaxed">
-                          {pivot}
-                        </p>
-
-                        <button
-                          onClick={() => handlePivotClick(pivot)}
-                          className="w-full py-3 rounded-lg bg-white/5 hover:bg-accent hover:text-black text-white font-medium transition-all flex items-center justify-center gap-2 group/btn"
-                        >
-                          <span>Analyze Vector</span>
-                          <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                        </button>
                       </div>
-                    </motion.div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pivot Opportunities */}
+                <div className="space-y-4 pt-8 border-t border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                      <Zap className="w-6 h-6 text-purple-500" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">
+                        Pivot Opportunities
+                      </h2>
+                      <p className="text-text-muted text-sm font-mono">
+                        ADJACENT_MARKET_VECTORS
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {results.pivot_options?.map((pivot, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="group p-6 rounded-xl bg-obsidian border border-white/5 hover:border-accent/30 transition-all relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-linear-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                        <div className="relative z-10 flex flex-col h-full">
+                          <div className="flex items-start gap-4 mb-4">
+                            <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-accent group-hover:bg-accent/10 transition-colors">
+                              <TrendingUp className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-lg font-bold text-white group-hover:text-accent transition-colors">
+                              Vector 0{index + 1}
+                            </h3>
+                          </div>
+
+                          <p className="text-gray-400 mb-6 flex-1 leading-relaxed">
+                            {pivot}
+                          </p>
+
+                          <button
+                            onClick={() => handlePivotClick(pivot)}
+                            className="w-full py-3 rounded-lg bg-white/5 hover:bg-accent hover:text-black text-white font-medium transition-all flex items-center justify-center gap-2 group/btn"
+                          >
+                            <span>Analyze Vector</span>
+                            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

@@ -61,6 +61,10 @@ It is very important that you generate ideas strictly based on the local context
         Examples:
         - For "Online Fitness Coaching Platform": Elements could include Content (workout videos that make sweating fun), Training (plans that transform couch potatoes into athletes with disciplined humor), etc.
 
+        - Gradual Funding Strategy: A step-by-step guide to funding the business starting from $0.
+        - Brand & Community Expansion Tips: Actionable tips for growing the brand and community.
+        - Sustainability Roadmap: A list of 3-5 key sustainability milestones.
+
         Output STRICTLY in raw JSON format matching this exact schema. No additional text, no markdown, no explanations outside JSON—keep it clean and disciplined.
         {{
             "original_idea": "{idea}",
@@ -78,7 +82,18 @@ It is very important that you generate ideas strictly based on the local context
             ],
             "pivot_options": ["string1", "string2", "string3"],  // 3-5 strings
             "sustainability_tip": "string",
-            "currency": "{currency}"
+            "gradual_funding_strategy": [
+                {{"step": "string", "amount": "string", "description": "string"}}
+            ],
+            "brand_and_community_expansion_tips": ["string1", "string2"],
+            "sustainability_roadmap": [
+                {{"milestone": "string", "timeline": "string", "description": "string"}}
+            ],
+            "sustainability_roadmap": [
+                {{"milestone": "string", "timeline": "string", "description": "string"}}
+            ],
+            "currency": "{currency}",
+            "overall_score": int // 0-100 score of potential success
         }}
         """
 
@@ -144,7 +159,23 @@ def _get_mock_data(idea: str, currency: str = "USD") -> DeconstructionResult:
         elements=mock_elements,
         pivot_options=["Pivot to Teaching", "Pivot to Supply Chain"],
         sustainability_tip="Start small, reinvest profits from the cheapest entry point.",
-        currency=currency
+        gradual_funding_strategy=[
+            {"step": "Bootstrapping", "amount": f"0 - 500 {currency}", "description": "Use personal savings to buy initial ingredients."},
+            {"step": "Pre-sales", "amount": f"500 - 2000 {currency}", "description": "Sell to friends and family to fund first batch."},
+            {"step": "Reinvestment", "amount": f"2000+ {currency}", "description": "Reinvest 100% of profits into better packaging and marketing."}
+        ],
+        brand_and_community_expansion_tips=[
+            "Collaborate with local beauty influencers.",
+            "Host a 'Make Your Own Soap' workshop.",
+            "Start a 'Clean Living' challenge on social media."
+        ],
+        sustainability_roadmap=[
+            {"milestone": "Eco-friendly Packaging", "timeline": "Month 3", "description": "Switch to biodegradable packaging."},
+            {"milestone": "Local Sourcing", "timeline": "Month 6", "description": "Source 80% of ingredients locally to reduce carbon footprint."},
+            {"milestone": "Zero Waste Production", "timeline": "Year 1", "description": "Implement processes to reuse or recycle all waste."}
+        ],
+        currency=currency,
+        overall_score=85
     )
 
 

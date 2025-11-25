@@ -17,6 +17,8 @@ export const useAuthStore = create((set, get) => ({
   logout: () => set({ user: null, isAuthenticated: false, currentPage: 'home', selectedProjectId: null }),
   setCurrentPage: (page) => set({ currentPage: page }),
   setSelectedProjectId: (projectId) => set({ selectedProjectId: projectId }),
+  selectedStrategyId: null,
+  setSelectedStrategyId: (strategyId) => set({ selectedStrategyId: strategyId }),
   setCurrency: (currency) => set({ currency }),
   updateSettings: (newSettings) => set((state) => ({ settings: { ...state.settings, ...newSettings } })),
   

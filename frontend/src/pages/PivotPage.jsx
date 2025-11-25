@@ -404,7 +404,12 @@ export default function PivotPage() {
           {activeTab === "overview" && (
             <div className="space-y-8">
               {/* Hero Section: Cheapest Entry Point */}
-              <Card className="p-8 relative group overflow-hidden border-accent/30">
+              <Card
+                className="p-8 relative group overflow-hidden border-accent/30 cursor-pointer hover:border-accent/50 transition-all"
+                onClick={() =>
+                  useAuthStore.getState().setCurrentPage("cheapest")
+                }
+              >
                 <div className="absolute inset-0 bg-linear-to-r from-accent/10 via-transparent to-transparent opacity-50" />
                 <div className="absolute right-0 top-0 w-64 h-64 bg-accent/20 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2" />
 
@@ -554,8 +559,8 @@ export default function PivotPage() {
             <StrategyBoard
               strategies={strategies}
               onEdit={(s) => {
-                setEditingStrategy(s);
-                setIsModalOpen(true);
+                useAuthStore.getState().setSelectedStrategyId(s.id);
+                useAuthStore.getState().setCurrentPage("strategy-details");
               }}
               onDelete={handleDeleteStrategy}
               onStatusChange={handleStatusChange}
