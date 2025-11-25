@@ -30,6 +30,10 @@ import {
 } from "../components/PivotComponents";
 import StrategyBoard from "../components/StrategyBoard";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import {
+  DeconstructLoader,
+  StrategyUnlockLoader,
+} from "../components/CreativeLoaders";
 
 // --- Utility Components ---
 
@@ -204,18 +208,17 @@ export default function PivotPage() {
   });
 
   const deconstructMutation = useMutation({
-    mutationFn: async ({ idea, currency, token }) =>
-      api.deconstructIdea(idea, currency, token),
+    mutationFn: async (idea) => {
+      const token = await user.getIdToken();
+      return api.deconstructIdea(idea, currency, token);
+    },
     onSuccess: (data) => {
-      toast.success("Project created! Running diagnosis...");
+      queryClient.invalidateQueries(["recent-projects"]);
       setSelectedProjectId(data.project_id);
-      // Automatically run diagnosis on the new project
-      handleRunDiagnosis(null, data.project_id);
+      toast.success("Idea deconstructed successfully!");
+      setShowDiagnosisForm(false);
     },
-    onError: (error) => {
-      console.error("Deconstruction failed:", error);
-      toast.error("Failed to create project.");
-    },
+    onError: () => toast.error("Failed to deconstruct idea."),
   });
 
   // --- Handlers ---
@@ -232,16 +235,13 @@ export default function PivotPage() {
   };
 
   const handleDeleteStrategy = (id) => {
-    // Implement delete if API supports it, or just hide/archive
     toast.error("Delete not yet implemented in backend");
   };
 
-  const handleRunDiagnosis = async (e, overrideProjectId = null) => {
+  const handleRunDiagnosis = async (e) => {
     if (e) e.preventDefault();
 
-    const projectId = overrideProjectId || selectedProjectId;
-
-    if (!projectId) {
+    if (!selectedProjectId) {
       toast.error("Please select a project first");
       return;
     }
@@ -249,7 +249,7 @@ export default function PivotPage() {
     try {
       const token = await user.getIdToken();
       diagnoseMutation.mutate({
-        projectId,
+        projectId: selectedProjectId,
         challenges: challenges || "General diagnosis",
         currency,
         token,
@@ -265,8 +265,7 @@ export default function PivotPage() {
       return;
     }
     try {
-      const token = await user.getIdToken();
-      deconstructMutation.mutate({ idea: newProjectIdea, currency, token });
+      deconstructMutation.mutate(newProjectIdea);
     } catch (error) {
       console.error("Error creating project:", error);
     }
@@ -377,7 +376,7 @@ export default function PivotPage() {
                     onClick={() => setActiveTab("board")}
                     icon={LayoutGrid}
                   >
-                    Strategy Board
+                    Strategy <span className="lg:block hidden">Board</span>
                   </TabButton>
                   <TabButton
                     active={activeTab === "evolution"}
@@ -420,12 +419,12 @@ export default function PivotPage() {
                       </h2>
                     </div>
                     <h3
-                      className="text-4xl md:text-5xl font-black text-white leading-tight line-clamp-3"
+                      className="text-xl md:text-5xl font-black text-white leading-tight line-clamp-3"
                       title={projectData?.cheapest_entry_point || "N/A"}
                     >
                       {projectData?.cheapest_entry_point || "N/A"}
                     </h3>
-                    <p className="text-gray-400 text-lg">
+                    <p className="text-gray-400 lg:text-lg text-sm">
                       This is your Minimum Viable Segment. Focus your initial
                       validation efforts here to minimize cost and maximize
                       learning.
@@ -438,7 +437,7 @@ export default function PivotPage() {
                         Estimated Cost
                       </span>
                       <div className="text-xl font-mono text-white">
-                        $0 - $500
+                        {projectData?.estimated_cost || "N/A"}
                       </div>
                     </div>
                     <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
@@ -446,7 +445,7 @@ export default function PivotPage() {
                         Time to Validate
                       </span>
                       <div className="text-xl font-mono text-white">
-                        1-2 Weeks
+                        {projectData?.time_to_validate || "N/A"}
                       </div>
                     </div>
                   </div>
@@ -460,15 +459,17 @@ export default function PivotPage() {
               >
                 <div className="absolute inset-0 bg-linear-to-r from-accent/10 via-transparent to-transparent opacity-50" />
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="flex items-start gap-6">
-                    <div className="p-5 rounded-2xl bg-accent/10 text-accent border border-accent/20 shadow-[0_0_30px_-10px_rgba(0,255,0,0.3)]">
-                      <Stethoscope className="w-10 h-10" />
-                    </div>
-                    <div className="space-y-2">
-                      <h3 className="text-3xl font-bold text-white">
+                  <div className="flex items-start gap-6 flex-col">
+                    <div className="flex items-center gap-3">
+                      <div className="p-5 rounded-2xl bg-accent/10 text-accent border border-accent/20 shadow-[0_0_30px_-10px_rgba(0,255,0,0.3)]">
+                        <Stethoscope className="lg:w-10 lg:h-10 w-8 h-8" />
+                      </div>
+                      <h3 className="lg:text-3xl text-xl font-bold text-white">
                         AI Diagnosis
                       </h3>
-                      <p className="text-gray-400 text-lg max-w-xl">
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-gray-400 lg:text-xl text-lg max-w-full">
                         Identify weak links in your strategy and generate new
                         discovery options using our advanced AI model.
                       </p>
@@ -628,24 +629,26 @@ export default function PivotPage() {
                   <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
                     Select Project to Diagnose
                   </label>
-                  <div className="grid gap-2 max-h-60 overflow-y-auto custom-scrollbar">
-                    {recentProjects.map((p) => (
-                      <button
-                        key={p.id}
-                        onClick={() => setSelectedProjectId(p.id)}
-                        className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
-                          selectedProjectId === p.id
-                            ? "bg-accent/10 border-accent/30 text-white"
-                            : "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10"
-                        }`}
-                      >
-                        <FolderOpen className="w-4 h-4" />
-                        <span className="flex-1 truncate">{p.name}</span>
-                        {selectedProjectId === p.id && (
-                          <CheckCircle2 className="w-4 h-4 text-accent" />
-                        )}
-                      </button>
-                    ))}
+                  <div className="relative">
+                    <select
+                      value={selectedProjectId || ""}
+                      onChange={(e) => setSelectedProjectId(e.target.value)}
+                      className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-accent focus:bg-white/10 outline-none cursor-pointer"
+                    >
+                      <option value="" disabled>
+                        Select a project...
+                      </option>
+                      {recentProjects.map((p) => (
+                        <option
+                          key={p.id}
+                          value={p.id}
+                          className="bg-[#0A0A0A]"
+                        >
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
                 </div>
 
@@ -725,37 +728,9 @@ export default function PivotPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8"
+            className="fixed inset-0 z-[100]"
           >
-            <div className="relative w-32 h-32 mb-8">
-              <motion.div
-                className="absolute inset-0 border-4 border-accent/30 rounded-full"
-                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              <motion.div
-                className="absolute inset-0 border-4 border-t-accent border-r-transparent border-b-transparent border-l-transparent rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              />
-              <Sparkles className="absolute inset-0 m-auto w-12 h-12 text-accent animate-pulse" />
-            </div>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-black text-white mb-4 text-center"
-            >
-              Deconstructing Reality...
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-gray-400 text-lg max-w-md text-center"
-            >
-              Breaking down your idea into elemental components. Applying{" "}
-              {currency} market context...
-            </motion.p>
+            <DeconstructLoader />
           </motion.div>
         )}
       </AnimatePresence>
@@ -767,31 +742,23 @@ export default function PivotPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8"
+            className="fixed inset-0 z-[100]"
           >
-            <div className="relative w-32 h-32 mb-8">
-              <motion.div
-                className="absolute inset-0 border-4 border-red-500/30 rounded-full"
-                animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
-                transition={{ duration: 1, repeat: Infinity }}
-              />
-              <Stethoscope className="absolute inset-0 m-auto w-12 h-12 text-red-500 animate-bounce" />
-            </div>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-3xl font-black text-white mb-4 text-center"
-            >
-              Running System Diagnosis
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-gray-400 text-lg max-w-md text-center"
-            >
-              Identifying weak links and bottlenecks in your strategy...
-            </motion.p>
+            <DeconstructLoader />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Creative Loading Overlay for Strategy Unlock */}
+      <AnimatePresence>
+        {createPivotMutation.isPending && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100]"
+          >
+            <StrategyUnlockLoader />
           </motion.div>
         )}
       </AnimatePresence>

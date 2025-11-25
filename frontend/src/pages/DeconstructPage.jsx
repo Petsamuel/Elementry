@@ -10,9 +10,7 @@ import {
   Send,
   DollarSign,
   TrendingUp,
-  Lightbulb,
   Rocket,
-  Target,
   Zap,
   Award,
   BarChart3,
@@ -21,11 +19,9 @@ import {
   Megaphone,
   Box,
   Activity,
-  Shield,
   Layers,
   Globe,
   Cpu,
-  Search,
   ArrowRight,
   X,
   Maximize2,
@@ -43,6 +39,7 @@ import {
 } from "recharts";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown, FolderOpen, CheckCircle2 } from "lucide-react";
+import { DeconstructLoader } from "../components/CreativeLoaders";
 
 // --- Utility Components ---
 
@@ -104,6 +101,8 @@ export default function DeconstructPage() {
   const [results, setResults] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedElement, setExpandedElement] = useState(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
 
   // Fetch project if selectedProjectId is present
   const { data: projectData, isLoading: isLoadingProject } = useQuery({
@@ -165,6 +164,21 @@ export default function DeconstructPage() {
     onError: (error) => {
       console.error("Failed to create pivot:", error);
       toast.error("Failed to activate pivot opportunity.");
+    },
+  });
+
+  const updateProjectNameMutation = useMutation({
+    mutationFn: async ({ projectId, name }) => {
+      const token = await user.getIdToken();
+      return api.updateProjectName(projectId, name, token);
+    },
+    onSuccess: (data) => {
+      setResults({ ...results, name: data.name });
+      toast.success("Project name updated!");
+    },
+    onError: (error) => {
+      console.error("Failed to update project name:", error);
+      toast.error("Failed to update project name.");
     },
   });
 
@@ -302,14 +316,46 @@ export default function DeconstructPage() {
                   </span>
                 </motion.div>
                 <div className="flex items-center gap-4">
-                  <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1, type: "spring" }}
-                    className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 w-sm truncate"
-                  >
-                    {results.name || "Untitled Project"}
-                  </motion.h1>
+                  {isEditingName ? (
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      onBlur={() => {
+                        if (editedName.trim() && editedName !== results.name) {
+                          updateProjectNameMutation.mutate({
+                            projectId: results.project_id,
+                            name: editedName.trim(),
+                          });
+                        }
+                        setIsEditingName(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.target.blur();
+                        } else if (e.key === "Escape") {
+                          setEditedName(results.name || "Untitled Project");
+                          setIsEditingName(false);
+                        }
+                      }}
+                      autoFocus
+                      className="text-2xl md:text-3xl font-black tracking-tight bg-transparent border-b-2 border-accent outline-none text-white uppercase max-w-md px-2"
+                    />
+                  ) : (
+                    <motion.h1
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1, type: "spring" }}
+                      onClick={() => {
+                        setEditedName(results.name || "Untitled Project");
+                        setIsEditingName(true);
+                      }}
+                      className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white via-white to-gray-500 uppercase line-clamp-2 w-sm truncate cursor-pointer hover:opacity-80 transition-opacity"
+                      title="Click to edit project name"
+                    >
+                      {results.name || "Untitled Project"}
+                    </motion.h1>
+                  )}
                   {/* Project Selector */}
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger asChild>
@@ -523,7 +569,7 @@ export default function DeconstructPage() {
                   <div className="absolute inset-0 bg-linear-to-r from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start">
                     <div className="p-4 rounded-2xl bg-accent/10 border border-accent/20 group-hover:scale-110 transition-transform duration-300">
-                      <Rocket className="w-8 h-8 text-accent" />
+                      <Rocket className="lg:w-8 lg:h-8 w-6 h-6 text-accent" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">
@@ -532,7 +578,7 @@ export default function DeconstructPage() {
                       <p className="text-xs text-accent font-mono mb-3">
                         MINIMUM_VIABLE_SEGMENT
                       </p>
-                      <p className="text-gray-300 leading-relaxed ">
+                      <p className="text-gray-300 leading-relaxed lg:text-lg text-[14.5px]">
                         {results.cheapest_entry_point}
                       </p>
                     </div>
@@ -662,7 +708,7 @@ export default function DeconstructPage() {
                           <h3 className="text-lg font-bold text-white mb-1 group-hover:text-accent transition-colors">
                             {element.name}
                           </h3>
-                          <p className="text-xs font-mono text-primary uppercase tracking-wider mb-3">
+                          <p className="text-xs font-mono text-accent uppercase tracking-wider mb-3">
                             {element.type}
                           </p>
                           <p className="text-sm text-gray-400 line-clamp-3 mb-4">
@@ -728,7 +774,7 @@ export default function DeconstructPage() {
                               <h2 className="text-2xl font-bold text-white">
                                 {expandedElement.name}
                               </h2>
-                              <p className="text-primary font-mono text-sm uppercase tracking-wider">
+                              <p className="text-accent font-mono text-sm uppercase tracking-wider">
                                 {expandedElement.type}
                               </p>
                             </div>
@@ -739,7 +785,7 @@ export default function DeconstructPage() {
                               <h3 className="text-sm font-bold text-gray-300 mb-2 uppercase tracking-wide">
                                 Description
                               </h3>
-                              <p className="text-lg text-white leading-relaxed">
+                              <p className="lg:text-lg text-[14.5px] text-white leading-relaxed">
                                 {expandedElement.description}
                               </p>
                             </div>
@@ -749,7 +795,7 @@ export default function DeconstructPage() {
                                 <h3 className="text-xs font-bold text-gray-400 mb-1 uppercase">
                                   Monetization
                                 </h3>
-                                <p className="text-xl font-bold text-accent">
+                                <p className="lg:text-xl text-[14.5px] font-bold text-accent">
                                   {expandedElement.monetization_potential}
                                 </p>
                               </div>
@@ -819,6 +865,20 @@ export default function DeconstructPage() {
                 </div>
               </div>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Creative Loading Overlay for Deconstruction */}
+      <AnimatePresence>
+        {deconstructMutation.isPending && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100]"
+          >
+            <DeconstructLoader />
           </motion.div>
         )}
       </AnimatePresence>

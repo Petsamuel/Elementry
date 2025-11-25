@@ -26,6 +26,7 @@ import BlogPage from "./pages/BlogPage";
 import AboutPage from "./pages/AboutPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
+import HelpCenterPage from "./pages/HelpCenterPage";
 import { ThemeProvider } from "./context/ThemeContext";
 import { auth, googleProvider } from "./lib/firebase";
 import { signInWithPopup } from "firebase/auth";
@@ -137,6 +138,7 @@ function AppContent() {
             {currentPage === "resources" && <ResourcesPage />}
             {currentPage === "saved" && <SavedProjectsPage />}
             {currentPage === "settings" && <SettingsPage />}
+            {currentPage === "help" && <HelpCenterPage />}
           </DashboardLayout>
         ) : (
           <PublicLayout onLogin={handleLogin} onNavigate={setCurrentPage}>

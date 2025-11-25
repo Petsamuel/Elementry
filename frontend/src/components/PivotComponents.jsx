@@ -204,7 +204,7 @@ export const StrategyListItem = ({
 
       {/* Content */}
       <div className="relative z-10 flex-1">
-        <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-400 transition-all">
+        <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-white group-hover:to-gray-400 transition-all">
           {strategy.title}
         </h3>
         <p className="text-sm text-gray-400 line-clamp-3 mb-6 leading-relaxed">
@@ -376,7 +376,7 @@ export const StrategyDetailView = ({
               </Tabs.List>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-gradient-to-b from-black to-obsidian">
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-linear-to-b from-black to-obsidian">
               <form id="strategy-form" onSubmit={handleSubmit}>
                 <Tabs.Content
                   value="overview"

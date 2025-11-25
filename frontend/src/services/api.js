@@ -119,6 +119,17 @@ export const api = {
     return response.data;
   },
 
+  updateProjectName: async (projectId, name, token) => {
+    const response = await axios.patch(
+      `${API_URL}/dashboard/projects/${projectId}/name`,
+      { name },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
+
   getProject: async (projectId, token) => {
     const response = await axios.get(
       `${API_URL}/dashboard/projects/${projectId}`,

@@ -19,7 +19,7 @@ export default function InputSection({ onDeconstruct, loading }) {
       className="max-w-3xl mx-auto"
     >
       <form onSubmit={handleSubmit} className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+        <div className="absolute -inset-1 bg-linear-to-r from-primary to-accent rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
         <div className="relative glass-panel rounded-2xl p-2 flex items-center">
           <input
             type="text"

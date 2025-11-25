@@ -153,7 +153,7 @@ export default function DashboardOverview() {
         className="space-y-4"
       >
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
+          <Sparkles className="w-5 h-5 text-accent" />
           <h2 className="text-2xl font-bold text-text">AI Insights</h2>
         </div>
         {alerts.length > 0 ? (
@@ -188,12 +188,12 @@ export default function DashboardOverview() {
         >
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" />
+              <Clock className="w-5 h-5 text-accent" />
               <h2 className="text-xl font-bold text-text">Recent Projects</h2>
             </div>
             <button
               onClick={() => setCurrentPage("saved")}
-              className="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
+              className="text-accent hover:text-accent/80 text-sm font-medium transition-colors"
             >
               View All
             </button>
@@ -212,7 +212,7 @@ export default function DashboardOverview() {
                   {/* Project Info */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-text group-hover:text-primary transition-colors">
+                      <h3 className="font-semibold text-text group-hover:text-accent transition-colors">
                         {project.name}
                       </h3>
                       <p className="text-text-muted text-sm">
@@ -244,7 +244,7 @@ export default function DashboardOverview() {
                       }}
                       className="flex-1 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-text-muted hover:text-text text-sm font-medium transition-all flex items-center justify-center gap-2"
                     >
-                      <FolderOpen className="w-4 h-4" />
+                      <FolderOpen className="w-4 h-4 " />
                       View
                     </button>
                     <button
@@ -284,7 +284,7 @@ export default function DashboardOverview() {
               className="w-full btn-primary flex items-center justify-center gap-2"
             >
               <Sparkles className="w-5 h-5" />
-              New Analysis
+              New Project
             </button>
             <button
               onClick={() => setCurrentPage("saved")}

@@ -16,6 +16,8 @@ class DeconstructionRequest(BaseModel):
 class DeconstructionResult(BaseModel):
     original_idea: str
     cheapest_entry_point: str
+    estimated_cost: str
+    time_to_validate: str
     elements: List[BusinessElement]  # Should be exactly 7
     pivot_options: List[str]
     sustainability_tip: str

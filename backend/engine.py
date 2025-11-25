@@ -52,7 +52,9 @@ It is very important that you generate ideas strictly based on the local context
           6. Community Building (fostering networks and forums—creating tribes where ideas thrive and laughs are shared),
           7. Technology/Innovation (tools, apps, R&D—innovating like a mad scientist with practical genius).
         - For each element: Give a concise, evocative name; type (from above or similar); description (2-3 sentences weaving in storytelling, humor, and business logic on how it fits the idea, inspiring the user to see its potential); and monetization potential (High: scalable like a viral hit; Medium: steady as a loyal customer base; Low: supportive, like the unsung hero behind the scenes).
-        - Cheapest Entry Point: Describe the simplest, lowest-cost validation/start method in an encouraging, practical narrative (e.g., "Kick off with a free blog, testing waters like a cautious explorer dipping a toe in the ocean—minimal risk, maximum insight"). Mention costs in {currency}.
+        - Cheapest Entry Point: Describe the simplest, lowest-cost validation/start method in an encouraging, practical narrative (e.g., "Kick off with a free blog, testing waters like a cautious explorer dipping a toe in the ocean—minimal risk, maximum insight").
+        - Estimated Cost: The estimated financial cost to start the cheapest entry point (e.g. "$0 - $500"). Mention costs in {currency}.
+        - Time to Validate: The estimated time to validate the cheapest entry point (e.g. "1-2 Weeks").
         - Pivot Options: 3-5 adjacent industries or variations, phrased as visionary opportunities with a touch of humor (e.g., "Pivot to wellness coaching: because who wouldn't want to turn sweat into serenity?").
         - Sustainability Tip: One key piece of advice for long-term success, delivered with purpose-driven wisdom and a hint of storytelling (e.g., "Build recurring revenue streams, like planting seeds that grow into a forest of financial stability—patience pays dividends").
 
@@ -63,6 +65,8 @@ It is very important that you generate ideas strictly based on the local context
         {{
             "original_idea": "{idea}",
             "cheapest_entry_point": "string description",
+            "estimated_cost": "string",
+            "time_to_validate": "string",
             "elements": [
                 {{
                     "name": "string",
@@ -134,7 +138,9 @@ def _get_mock_data(idea: str, currency: str = "USD") -> DeconstructionResult:
 
     return DeconstructionResult(
         original_idea=idea,
-        cheapest_entry_point=f"Content (Start a blog/vlog about the process) - Cost: 0 {currency}",
+        cheapest_entry_point=f"Content (Start a blog/vlog about the process)",
+        estimated_cost=f"0 - 500 {currency}",
+        time_to_validate="1-2 Weeks",
         elements=mock_elements,
         pivot_options=["Pivot to Teaching", "Pivot to Supply Chain"],
         sustainability_tip="Start small, reinvest profits from the cheapest entry point.",

@@ -210,7 +210,7 @@ export default function DashboardLayout({ children, onLogout }) {
             <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px]" />
           </div>
 
-          <div className="relative z-10 max-w-6xl mx-auto">{children}</div>
+          <div className="relative z-10 items-center justify-center flex flex-col">{children}</div>
         </main>
       </div>
     </div>
