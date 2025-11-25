@@ -16,6 +16,11 @@ import {
   Monitor,
   Smartphone,
   Zap,
+  User,
+  Mail,
+  CreditCard,
+  Upload,
+  AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -198,6 +203,76 @@ export default function SettingsPage() {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Profile Settings */}
+        <SettingSection title="Profile" icon={User} delay={0.05}>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="relative group cursor-pointer">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-accent/50 group-hover:border-accent transition-colors">
+                <img
+                  src={
+                    user?.photoURL ||
+                    `https://ui-avatars.com/api/?name=${
+                      user?.displayName || "User"
+                    }&background=random`
+                  }
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Upload className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white">
+                {user?.displayName || "User"}
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Mail className="w-4 h-4" />
+                {user?.email}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-accent">
+                <CreditCard className="w-4 h-4" />
+                <span className="font-bold uppercase tracking-wider text-xs">
+                  {user?.plan || "starter Plan"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() =>
+                toast.success(
+                  "Upgrade request sent! We'll contact you shortly."
+                )
+              }
+              className="w-full py-3 px-4 rounded-xl bg-accent/10 border border-accent/20 text-accent font-bold hover:bg-accent/20 transition-all flex items-center justify-center gap-2"
+            >
+              <Zap className="w-4 h-4" />
+              Request Upgrade
+            </button>
+
+            <button
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Are you sure you want to deactivate your account? This action cannot be undone."
+                  )
+                ) {
+                  toast.error(
+                    "Account deactivation is not yet implemented in this demo."
+                  );
+                }
+              }}
+              className="w-full py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold hover:bg-red-500/20 transition-all flex items-center justify-center gap-2"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              Deactivate Account
+            </button>
+          </div>
+        </SettingSection>
+
         {/* Localization & Currency */}
         <SettingSection title="Localization" icon={Globe} delay={0.1}>
           <Select
