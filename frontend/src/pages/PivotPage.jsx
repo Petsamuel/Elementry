@@ -23,6 +23,8 @@ import {
   Sparkles,
   Loader2,
   Send,
+  Calendar,
+  Activity,
 } from "lucide-react";
 import {
   StrategyListItem,
@@ -571,12 +573,144 @@ export default function PivotPage() {
 
           {/* EVOLUTION TAB (Placeholder) */}
           {activeTab === "evolution" && (
-            <div className="flex flex-col items-center justify-center h-96 text-gray-500">
-              <Network className="w-16 h-16 mb-4 opacity-20" />
-              <h3 className="text-xl font-bold text-white mb-2">
-                Evolution Map
-              </h3>
-              <p>Visualizing your strategy network coming soon.</p>
+            <div className="max-w-4xl mx-auto space-y-8">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <Network className="w-6 h-6 text-accent" />
+                  Strategy Evolution Map
+                </h3>
+                <div className="text-sm text-gray-400">
+                  {activePivots.length + 1} Nodes
+                </div>
+              </div>
+
+              <div className="relative pl-8 border-l-2 border-white/10 space-y-12">
+                {/* Project Origin Node */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="relative"
+                >
+                  <div className="absolute -left-[41px] top-0 w-5 h-5 rounded-full bg-white border-4 border-obsidian shadow-[0_0_0_4px_rgba(255,255,255,0.1)]" />
+                  <Card className="p-6 border-white/20">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                          Origin
+                        </div>
+                        <h4 className="text-xl font-bold text-white mb-2">
+                          {projectData?.name}
+                        </h4>
+                        <p className="text-gray-400 text-sm line-clamp-2">
+                          {projectData?.original_idea || "Initial concept"}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/5">
+                        <Sparkles className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {projectData?.created_at
+                          ? new Date(
+                              projectData.created_at
+                            ).toLocaleDateString()
+                          : "Unknown Date"}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Target className="w-3 h-3" />
+                        Score: {projectData?.overall_score || 0}/100
+                      </span>
+                    </div>
+                  </Card>
+                </motion.div>
+
+                {/* Pivot Nodes */}
+                {activePivots
+                  .sort(
+                    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                  )
+                  .map((pivot, index) => (
+                    <motion.div
+                      key={pivot.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 + 0.2 }}
+                      className="relative"
+                    >
+                      <div
+                        className={`absolute -left-[41px] top-0 w-5 h-5 rounded-full border-4 border-obsidian shadow-[0_0_0_4px_rgba(255,255,255,0.1)] ${
+                          pivot.status === "success"
+                            ? "bg-green-500"
+                            : pivot.status === "growth"
+                            ? "bg-purple-500"
+                            : "bg-accent"
+                        }`}
+                      />
+                      <Card
+                        className="p-6 hover:border-accent/50 transition-colors cursor-pointer"
+                        onClick={() => {
+                          useAuthStore
+                            .getState()
+                            .setSelectedStrategyId(pivot.id);
+                          useAuthStore
+                            .getState()
+                            .setCurrentPage("strategy-details");
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Pivot {index + 1}
+                              </span>
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${
+                                  pivot.status === "success"
+                                    ? "bg-green-500/20 text-green-400"
+                                    : "bg-accent/10 text-accent"
+                                }`}
+                              >
+                                {pivot.status}
+                              </span>
+                            </div>
+                            <h4 className="text-xl font-bold text-white mb-2">
+                              {pivot.pivot_name}
+                            </h4>
+                            <p className="text-gray-400 text-sm line-clamp-2">
+                              {pivot.analysis?.market_fit || pivot.description}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-xl bg-white/5">
+                            <GitBranch className="w-5 h-5 text-accent" />
+                          </div>
+                        </div>
+                        <div className="mt-4 flex items-center gap-4 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {pivot.created_at
+                              ? new Date(pivot.created_at).toLocaleDateString()
+                              : "Unknown Date"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Activity className="w-3 h-3" />
+                            Viability: {pivot.analysis?.viability_score || 0}%
+                          </span>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+
+                {activePivots.length === 0 && (
+                  <div className="relative">
+                    <div className="absolute -left-[39px] top-0 w-4 h-4 rounded-full bg-white/20 border-4 border-obsidian" />
+                    <div className="p-6 border border-white/5 border-dashed rounded-2xl bg-white/5 text-center text-gray-500">
+                      No pivots yet. Start by exploring strategies.
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </motion.div>

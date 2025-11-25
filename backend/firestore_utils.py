@@ -755,3 +755,85 @@ def update_user_settings(uid: str, settings_data: Dict) -> bool:
     settings_ref.set(settings_data, merge=True)
     
     return True
+
+def get_strategy_details(uid: str, strategy_id: str) -> Optional[Dict]:
+    """
+    Get detailed strategy data (market, risks, timeline)
+    """
+    db = get_db()
+    if not db:
+        return None
+    
+    # Try strategies collection first
+    doc_ref = db.collection('users').document(uid).collection('strategies').document(strategy_id)
+    doc = doc_ref.get()
+    
+    if not doc.exists:
+        # Try pivots collection
+        doc_ref = db.collection('users').document(uid).collection('pivots').document(strategy_id)
+        doc = doc_ref.get()
+        
+    if not doc.exists:
+        return None
+        
+    data = doc.to_dict()
+    
+    # Return the details part
+    return {
+        "title": data.get("title") or data.get("pivot_name"),
+        "description": data.get("description") or data.get("analysis", {}).get("market_fit"),
+        "marketAnalysis": data.get("marketAnalysis", {
+            "marketSize": {
+                "tam": {"value": "", "currency": "USD", "description": "Total Addressable Market"},
+                "sam": {"value": "", "currency": "USD", "description": "Serviceable Available Market"},
+                "som": {"value": "", "currency": "USD", "description": "Serviceable Obtainable Market"}
+            },
+            "competitors": [],
+            "trends": [],
+            "customerSegments": []
+        }),
+        "risks": data.get("risks", []),
+        "timeline": data.get("timeline", [])
+    }
+
+def update_strategy_details(uid: str, strategy_id: str, details: Dict) -> bool:
+    """
+    Update detailed strategy data
+    """
+    db = get_db()
+    if not db:
+        return False
+    
+    # Try strategies collection first
+    doc_ref = db.collection('users').document(uid).collection('strategies').document(strategy_id)
+    doc = doc_ref.get()
+    
+    if not doc.exists:
+        # Try pivots collection
+        doc_ref = db.collection('users').document(uid).collection('pivots').document(strategy_id)
+        doc = doc_ref.get()
+        
+    if not doc.exists:
+        return False
+        
+    # Update the document with new details
+    update_data = {
+        "marketAnalysis": details.get("marketAnalysis"),
+        "risks": details.get("risks"),
+        "timeline": details.get("timeline"),
+        "updated_at": firestore.SERVER_TIMESTAMP
+    }
+    
+    if details.get("title"):
+        update_data["title"] = details.get("title")
+        # Also update pivot_name for backward compatibility
+        update_data["pivot_name"] = details.get("title")
+        
+    if details.get("description"):
+        update_data["description"] = details.get("description")
+        # Note: We avoid updating analysis.market_fit directly here to prevent overwriting if analysis structure is complex
+        # But we ensure description is set at top level
+
+    doc_ref.update(update_data)
+    
+    return True

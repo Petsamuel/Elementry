@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from models import DeconstructionRequest, DeconstructionResult, PivotRequest, DiagnosisRequest, DiagnosisResult, StrategyRequest, StrategyUpdateRequest, SettingsUpdate
+from models import DeconstructionRequest, DeconstructionResult, PivotRequest, DiagnosisRequest, DiagnosisResult, StrategyRequest, StrategyUpdateRequest, SettingsUpdate, StrategyDetailsUpdate
 from engine import deconstruct_business_idea, generate_diagnosis
 from auth import verify_token, sync_user_to_firestore, check_ai_limit, increment_ai_usage
 from typing import Annotated
@@ -441,6 +441,47 @@ async def update_settings_endpoint(
     
     return {"success": success}
 
+
+
+
+@app.get("/strategies/{strategy_id}/details")
+async def get_strategy_details_endpoint(strategy_id: str, token_data: dict = Depends(get_token)):
+    """Get detailed strategy data (market, risks, timeline)"""
+    from firestore_utils import get_strategy_details
+    
+    details = get_strategy_details(token_data['uid'], strategy_id)
+    if not details:
+        # Return empty default structure if not found
+        return {
+            "marketAnalysis": {
+                "marketSize": {
+                    "tam": {"value": "", "currency": "USD", "description": "Total Addressable Market"},
+                    "sam": {"value": "", "currency": "USD", "description": "Serviceable Available Market"},
+                    "som": {"value": "", "currency": "USD", "description": "Serviceable Obtainable Market"}
+                },
+                "competitors": [],
+                "trends": [],
+                "customerSegments": []
+            },
+            "risks": [],
+            "timeline": []
+        }
+    return details
+
+@app.put("/strategies/{strategy_id}/details")
+async def update_strategy_details_endpoint(
+    strategy_id: str,
+    details: StrategyDetailsUpdate,
+    token_data: dict = Depends(get_token)
+):
+    """Update detailed strategy data"""
+    from firestore_utils import update_strategy_details
+    
+    success = update_strategy_details(token_data['uid'], strategy_id, details.dict())
+    if not success:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+        
+    return {"success": success}
 
 
 if __name__ == "__main__":

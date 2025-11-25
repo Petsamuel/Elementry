@@ -108,3 +108,49 @@ class SettingsUpdate(BaseModel):
     compactMode: Optional[bool] = None
     aiOptimization: Optional[bool] = None
 
+
+class MarketSizeItem(BaseModel):
+    value: str
+    currency: str
+    description: str
+
+class MarketSize(BaseModel):
+    tam: MarketSizeItem
+    sam: MarketSizeItem
+    som: MarketSizeItem
+
+class Competitor(BaseModel):
+    id: str
+    name: str
+    strength: str
+    weakness: str
+    type: str
+
+class Risk(BaseModel):
+    id: str
+    description: str
+    impact: str
+    probability: str
+    mitigation: str
+    status: Optional[str] = "active"
+
+class TimelinePhase(BaseModel):
+    id: str
+    title: str
+    description: str
+    date: str
+    status: str
+
+class MarketAnalysis(BaseModel):
+    marketSize: MarketSize
+    competitors: List[Competitor]
+    trends: List[str]
+    customerSegments: List[str]
+
+
+class StrategyDetailsUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    marketAnalysis: MarketAnalysis
+    risks: List[Risk]
+    timeline: List[TimelinePhase]

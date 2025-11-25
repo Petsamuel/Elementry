@@ -202,10 +202,32 @@ export const api = {
     return response.data;
   },
 
+
   updateSettings: async (settings, token) => {
     const response = await axios.patch(
       `${API_URL}/settings`,
       settings,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
+
+  getStrategyDetails: async (strategyId, token) => {
+    const response = await axios.get(
+      `${API_URL}/strategies/${strategyId}/details`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  },
+
+  updateStrategyDetails: async (strategyId, details, token) => {
+    const response = await axios.put(
+      `${API_URL}/strategies/${strategyId}/details`,
+      details,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
